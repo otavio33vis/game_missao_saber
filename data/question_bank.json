@@ -1,0 +1,165 @@
+{
+  "quiz_title": "Missão Saber",
+  "shuffle_questions": true,
+  "shuffle_answers": true,
+  "questions": [
+    {
+      "id": 1, "category": "Matematica",
+      "text": "Quanto é 6 × 7?",
+      "image_path": "",
+      "answers": ["36", "48", "42", "54", "40"],
+      "correct_index": 2, "points": 1
+    },
+    {
+      "id": 2, "category": "Matematica",
+      "text": "Qual é a metade de 80?",
+      "image_path": "",
+      "answers": ["20", "30", "50", "40", "60"],
+      "correct_index": 3, "points": 1
+    },
+    {
+      "id": 3, "category": "Matematica",
+      "text": "Uma dúzia tem quantas unidades?",
+      "image_path": "",
+      "answers": ["10", "12", "15", "20", "8"],
+      "correct_index": 1, "points": 1
+    },
+    {
+      "id": 4, "category": "Matematica",
+      "text": "Se você tem R$ 50,00 e gasta R$ 23,00, quanto sobra?",
+      "image_path": "",
+      "answers": ["R$ 37,00", "R$ 17,00", "R$ 27,00", "R$ 33,00", "R$ 22,00"],
+      "correct_index": 2, "points": 1
+    },
+    {
+      "id": 5, "category": "Matematica",
+      "text": "Um quadrado tem quantos lados iguais?",
+      "image_path": "",
+      "answers": ["2", "3", "4", "6", "5"],
+      "correct_index": 2, "points": 1
+    },
+    {
+      "id": 6, "category": "Matematica",
+      "text": "Uma turma tem 32 alunos divididos em grupos de 8. Quantos grupos são formados?",
+      "image_path": "",
+      "answers": ["3 grupos", "4 grupos", "5 grupos", "6 grupos", "2 grupos"],
+      "correct_index": 1, "points": 1
+    },
+    {
+      "id": 7, "category": "Matematica",
+      "text": "João comprou 3 caixas de lápis com 12 lápis cada. Deu 8 e perdeu 4. Com quantos ficou?",
+      "image_path": "",
+      "answers": ["24", "36", "20", "28", "16"],
+      "correct_index": 2, "points": 1
+    },
+    {
+      "id": 8, "category": "Matematica",
+      "text": "Qual é o dobro de 35?",
+      "image_path": "",
+      "answers": ["60", "65", "70", "75", "80"],
+      "correct_index": 2, "points": 1
+    },
+    {
+      "id": 9, "category": "Matematica",
+      "text": "Quanto é 144 ÷ 12?",
+      "image_path": "",
+      "answers": ["10", "11", "12", "13", "14"],
+      "correct_index": 2, "points": 1
+    },
+    {
+      "id": 10, "category": "Matematica",
+      "text": "Se um triângulo tem ângulos de 60° e 80°, qual é o terceiro ângulo?",
+      "image_path": "",
+      "answers": ["30°", "40°", "50°", "60°", "70°"],
+      "correct_index": 1, "points": 1
+    },
+    {
+      "id": 11, "category": "Portugues",
+      "text": "Qual é o plural de 'pão'?",
+      "image_path": "",
+      "answers": ["pãos", "pões", "pães", "pãoes", "pãs"],
+      "correct_index": 2, "points": 1
+    },
+    {
+      "id": 12, "category": "Portugues",
+      "text": "Assinale a alternativa com erro de ortografia:",
+      "image_path": "",
+      "answers": ["excelente", "excesso", "exceção", "excessão", "excêntrico"],
+      "correct_index": 3, "points": 1
+    },
+    {
+      "id": 13, "category": "Portugues",
+      "text": "Qual palavra é um substantivo?",
+      "image_path": "",
+      "answers": ["correr", "bonito", "escola", "rapidamente", "mas"],
+      "correct_index": 2, "points": 1
+    },
+    {
+      "id": 14, "category": "Portugues",
+      "text": "Em 'O gato bebeu o leite', o sujeito é:",
+      "image_path": "",
+      "answers": ["leite", "bebeu", "o gato", "o leite", "gato leite"],
+      "correct_index": 2, "points": 1
+    },
+    {
+      "id": 15, "category": "Portugues",
+      "text": "Qual é o antônimo de 'alegre'?",
+      "image_path": "",
+      "answers": ["feliz", "contente", "animado", "triste", "satisfeito"],
+      "correct_index": 3, "points": 1
+    },
+    {
+      "id": 16, "category": "Portugues",
+      "text": "Qual das frases está corretamente pontuada?",
+      "image_path": "",
+      "answers": [
+        "Você quer ir ao mercado",
+        "Você quer ir ao mercado?",
+        "você quer ir ao mercado?",
+        "Você, quer ir ao mercado?",
+        "Você quer, ir ao mercado?"
+      ],
+      "correct_index": 1, "points": 1
+    },
+    {
+      "id": 17, "category": "Portugues",
+      "text": "O que é um verbo?",
+      "image_path": "",
+      "answers": [
+        "Palavra que indica qualidade",
+        "Palavra que indica ação, estado ou fenômeno",
+        "Palavra que substitui o substantivo",
+        "Palavra que liga orações",
+        "Palavra que modifica o verbo"
+      ],
+      "correct_index": 1, "points": 1
+    },
+    {
+      "id": 18, "category": "Portugues",
+      "text": "Qual é o sinônimo de 'veloz'?",
+      "image_path": "",
+      "answers": ["lento", "pesado", "rápido", "forte", "alto"],
+      "correct_index": 2, "points": 1
+    },
+    {
+      "id": 19, "category": "Portugues",
+      "text": "Em qual das opções há uma metáfora?",
+      "image_path": "",
+      "answers": [
+        "Ele correu como o vento",
+        "A vida é uma viagem",
+        "O menino alto chegou",
+        "Ela comprou três maçãs",
+        "O cachorro latiu alto"
+      ],
+      "correct_index": 1, "points": 1
+    },
+    {
+      "id": 20, "category": "Portugues",
+      "text": "Qual é o feminino de 'ator'?",
+      "image_path": "",
+      "answers": ["atora", "atriz", "atresse", "atore", "atória"],
+      "correct_index": 1, "points": 1
+    }
+  ]
+}

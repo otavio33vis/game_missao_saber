@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Missão Saber</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* ── Login ── */
+    #tela-login .logo {
+      font-family: var(--fonte-titulo);
+      font-size: clamp(2.5rem, 6vw, 4rem);
+      color: var(--cor-ouro);
+      text-align: center;
+      margin-bottom: 8px;
+      text-shadow: 3px 3px 0 rgba(0,0,0,0.6), 0 0 30px rgba(237,178,26,0.4);
+    }
+    #tela-login .subtitulo {
+      text-align: center;
+      color: rgba(255,255,255,0.6);
+      font-size: 0.9rem;
+      margin-bottom: 32px;
+    }
+
+    /* ── Menu Principal ── */
+    #tela-menu .menu-content {
+      display: flex; flex-direction: column;
+      align-items: center; gap: 16px;
+      padding: 40px 20px;
+    }
+    #tela-menu .menu-btns {
+      display: flex; flex-direction: column;
+      gap: 14px; width: 100%; max-width: 360px;
+    }
+
+    /* ── Mapa ── */
+    #tela-mapa .mapa-content {
+      display: flex; flex-direction: column;
+      align-items: center; gap: 24px;
+      padding: 40px 20px;
+    }
+    .mapa-blocos {
+      display: flex; gap: 20px;
+      flex-wrap: wrap; justify-content: center;
+    }
+    .bloco-mundo {
+      width: 200px; height: 200px;
+      border-radius: 20px;
+      border: 3px solid rgba(255,255,255,0.2);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 12px; cursor: pointer;
+      transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+      position: relative; overflow: hidden;
+      background-size: cover; background-position: center;
+    }
+    .bloco-mundo::before {
+      content: ''; position: absolute; inset: 0;
+      background: rgba(0,0,0,0.45);
+      transition: background 0.3s;
+    }
+    .bloco-mundo:hover {
+      transform: translateY(-6px) scale(1.03);
+      box-shadow: 0 12px 40px rgba(237,178,26,0.4);
+      border-color: var(--cor-ouro);
+    }
+    .bloco-mundo:hover::before { background: rgba(0,0,0,0.25); }
+    .bloco-mundo.completo { border-color: var(--cor-verde); }
+    .bloco-mundo.completo::after {
+      content: '✓';
+      position: absolute; top: 10px; right: 14px;
+      color: var(--cor-verde); font-size: 1.4rem; font-weight: 900;
+      z-index: 2;
+    }
+    .bloco-mundo > * { position: relative; z-index: 1; }
+    .bloco-nome {
+      font-family: var(--fonte-titulo);
+      font-size: 1.3rem; letter-spacing: 2px;
+      text-shadow: 2px 2px 0 rgba(0,0,0,0.8);
+    }
+    .bloco-nota {
+      font-size: 0.85rem; font-weight: 700;
+      color: var(--cor-ouro);
+      background: rgba(0,0,0,0.6);
+      padding: 4px 10px; border-radius: 20px;
+    }
+    .mapa-aluno {
+      font-size: 1rem; color: rgba(255,255,255,0.7);
+      font-weight: 700;
+    }
+
+    /* ── Quiz ── */
+    #tela-quiz {
+      align-items: stretch;
+      padding: 0;
+    }
+    .quiz-layout {
+      display: flex; flex-direction: column;
+      min-height: 100vh; width: 100%;
+      padding: 20px;
+      gap: 16px;
+    }
+    .quiz-header {
+      display: flex; align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .quiz-mundo-tag {
+      font-family: var(--fonte-titulo);
+      font-size: 0.9rem; letter-spacing: 2px;
+      color: var(--cor-tema-botao, var(--cor-ouro));
+      background: rgba(0,0,0,0.5);
+      padding: 6px 16px; border-radius: 20px;
+    }
+    #quiz-contador {
+      font-weight: 800; font-size: 0.9rem;
+      color: rgba(255,255,255,0.7);
+    }
+    #quiz-img-box {
+      display: none; text-align: center;
+    }
+    #quiz-img {
+      max-height: 180px; max-width: 100%;
+      border-radius: 12px;
+      object-fit: contain;
+    }
+    #quiz-pergunta {
+      font-size: clamp(1rem, 2.5vw, 1.3rem);
+      font-weight: 700; line-height: 1.5;
+      background: rgba(0,0,0,0.6);
+      padding: 20px; border-radius: 16px;
+      border-left: 4px solid var(--cor-tema-botao, var(--cor-ouro));
+    }
+    #quiz-alternativas {
+      display: flex; flex-direction: column; gap: 10px;
+      flex: 1;
+    }
+    .btn-alternativa {
+      display: flex; align-items: center; gap: 14px;
+      padding: 14px 18px;
+      border-radius: 14px;
+      border: 2px solid rgba(255,255,255,0.15);
+      background: var(--cor-tema-botao, rgba(255,255,255,0.08));
+      color: var(--cor-tema-texto, #fff);
+      font-family: var(--fonte-corpo);
+      font-size: 0.95rem; font-weight: 700;
+      cursor: pointer; text-align: left;
+      transition: transform 0.2s, border-color 0.2s, background 0.2s;
+    }
+    .btn-alternativa:hover:not(:disabled) {
+      transform: translateX(4px);
+      border-color: rgba(255,255,255,0.4);
+    }
+    .btn-alternativa:disabled { cursor: default; }
+    .btn-alternativa.correta {
+      background: var(--cor-verde) !important;
+      border-color: var(--cor-verde) !important;
+      color: #fff !important;
+      transform: translateX(4px);
+    }
+    .btn-alternativa.errada {
+      background: var(--cor-vermelho) !important;
+      border-color: var(--cor-vermelho) !important;
+      color: #fff !important;
+    }
+    .badge-letra {
+      min-width: 32px; height: 32px;
+      background: var(--cor-tema-badge, #000);
+      color: var(--cor-tema-texto, #fff);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--fonte-titulo); font-size: 0.9rem;
+      flex-shrink: 0;
+    }
+    .btn-menu-quiz {
+      background: rgba(0,0,0,0.5);
+      border: 2px solid rgba(255,255,255,0.2);
+      color: #fff; padding: 8px 16px;
+      border-radius: 20px; cursor: pointer;
+      font-family: var(--fonte-titulo); font-size: 0.85rem;
+      transition: border-color 0.2s;
+      width: auto;
+    }
+    .btn-menu-quiz:hover { border-color: var(--cor-ouro); color: var(--cor-ouro); }
+
+    /* ── Resultado Mundo ── */
+    #tela-resultado-mundo .res-content {
+      text-align: center;
+      display: flex; flex-direction: column;
+      align-items: center; gap: 16px;
+      padding: 40px 20px;
+    }
+    #res-mundo-nota {
+      font-family: var(--fonte-titulo);
+      font-size: 5rem; color: var(--cor-ouro);
+      text-shadow: 4px 4px 0 rgba(0,0,0,0.5), 0 0 40px rgba(237,178,26,0.5);
+      line-height: 1;
+    }
+    .res-label {
+      font-size: 0.8rem; font-weight: 700;
+      color: rgba(255,255,255,0.5);
+      text-transform: uppercase; letter-spacing: 2px;
+    }
+
+    /* ── Resultado Final ── */
+    #tela-resultado-final .res-final-content {
+      text-align: center;
+      display: flex; flex-direction: column;
+      align-items: center; gap: 20px;
+      padding: 40px 20px; max-width: 560px;
+    }
+    #res-final-media {
+      font-family: var(--fonte-titulo);
+      font-size: 4rem; color: var(--cor-ouro);
+      text-shadow: 3px 3px 0 rgba(0,0,0,0.5);
+    }
+    #res-final-status {
+      font-family: var(--fonte-titulo);
+      font-size: 1.8rem; letter-spacing: 2px;
+    }
+    .detalhes-materia {
+      display: flex; flex-direction: column; gap: 10px;
+      width: 100%;
+    }
+    .detalhe-item {
+      display: flex; align-items: center;
+      justify-content: space-between;
+      background: rgba(255,255,255,0.06);
+      border-radius: 12px; padding: 12px 20px;
+      border-left: 4px solid var(--cor-ouro);
+    }
+    .detalhe-item.mat  { border-color: var(--cor-mat); }
+    .detalhe-item.port { border-color: var(--cor-port); }
+    .detalhe-nome { font-weight: 800; font-size: 1rem; }
+    .detalhe-nota { font-family: var(--fonte-titulo); font-size: 1.3rem; color: var(--cor-ouro); }
+    .res-final-btns { display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 320px; }
+  </style>
+</head>
+<body>
+
+<!-- ── POPUP GLOBAL ── -->
+<div id="popup-overlay" class="popup-overlay">
+  <div class="popup-box">
+    <p id="popup-txt"></p>
+    <div class="popup-btns">
+      <button id="popup-sim" class="btn btn-vermelho">SIM</button>
+      <button id="popup-nao" class="btn btn-verde">NÃO</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+     TELA 1 — LOGIN DO ALUNO
+══════════════════════════════════════════════════════════════════════════ -->
+<section id="tela-login" class="tela ativa">
+  <div class="fundo-img" id="login-fundo" style="background-image: url('assets/imagens/menu.png')"></div>
+  <div class="card fade-enter">
+    <div class="logo">🎓 MISSÃO SABER</div>
+    <p class="subtitulo">Quiz Educativo — Escola Municipal</p>
+    <div class="input-group">
+      <label>Seu Nome</label>
+      <input type="text" id="input-nome" placeholder="Digite seu nome completo" maxlength="50">
+    </div>
+    <div class="input-group">
+      <label>Código da Turma</label>
+      <input type="text" id="input-turma" placeholder="Ex: 1234" maxlength="6">
+    </div>
+    <button class="btn btn-ouro" onclick="fazerLogin()">▶ JOGAR</button>
+    <br>
+    <button class="btn btn-ghost" style="margin-top:10px" onclick="irPara('tela-professor-login')">
+      👨‍🏫 Modo Professor
+    </button>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+     TELA 2 — MAPA
+══════════════════════════════════════════════════════════════════════════ -->
+<section id="tela-mapa" class="tela">
+  <div class="fundo-img" style="background-image: url('assets/imagens/mapa.png')"></div>
+  <div class="mapa-content">
+    <h1>ESCOLA MUNICIPAL</h1>
+    <p class="mapa-aluno" id="mapa-aluno-nome"></p>
+    <div class="mapa-blocos">
+      <div class="bloco-mundo" id="bloco-matematica"
+           style="background-image: url('assets/imagens/quiz_matematica.png')"
+           onclick="iniciarMundo('matematica')">
+        <div class="bloco-nome">MATEMÁTICA</div>
+        <div class="bloco-nota" id="nota-matematica" style="display:none"></div>
+      </div>
+      <div class="bloco-mundo" id="bloco-portugues"
+           style="background-image: url('assets/imagens/quiz_portugues.png')"
+           onclick="iniciarMundo('portugues')">
+        <div class="bloco-nome">PORTUGUÊS</div>
+        <div class="bloco-nota" id="nota-portugues" style="display:none"></div>
+      </div>
+    </div>
+    <div style="display:flex;gap:12px;margin-top:8px">
+      <button class="btn btn-ouro" style="width:auto;padding:12px 28px"
+              onclick="irParaResultadoFinal()">🏆 Resultado Final</button>
+      <button class="btn btn-ghost" style="width:auto;padding:12px 28px"
+              onclick="confirmarSairMenu()">← Menu</button>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+     TELA 3 — QUIZ
+══════════════════════════════════════════════════════════════════════════ -->
+<section id="tela-quiz" class="tela">
+  <div class="fundo-img" id="quiz-fundo"></div>
+  <div class="quiz-layout">
+    <div class="quiz-header">
+      <div class="quiz-mundo-tag" id="quiz-mundo-tag">MATEMÁTICA</div>
+      <div class="progress-bar" style="flex:1;margin:0">
+        <div class="progress-fill" id="quiz-progress" style="width:0%"></div>
+      </div>
+      <span id="quiz-contador">1 / 10</span>
+      <button class="btn btn-menu-quiz" onclick="confirmarSairQuiz()">☰ MENU</button>
+    </div>
+    <div id="quiz-img-box">
+      <img id="quiz-img" src="" alt="Imagem da questão">
+    </div>
+    <div id="quiz-pergunta"></div>
+    <div id="quiz-alternativas"></div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+     TELA 4 — RESULTADO DO MUNDO
+══════════════════════════════════════════════════════════════════════════ -->
+<section id="tela-resultado-mundo" class="tela">
+  <div class="fundo-img" id="res-mundo-fundo"></div>
+  <div class="res-content">
+    <h2 id="res-mundo-nome">MATEMÁTICA</h2>
+    <div class="res-label">NOTA</div>
+    <div id="res-mundo-nota">0</div>
+    <div class="estrelas" id="res-mundo-estrelas">★</div>
+    <p id="res-mundo-msg" style="font-size:1.2rem;font-weight:700"></p>
+    <div style="display:flex;flex-direction:column;gap:12px;width:100%;max-width:320px;margin-top:8px">
+      <button class="btn btn-ouro" id="btn-proximo-mundo" onclick="voltarMapa()">
+        🌍 Próximo Mundo
+      </button>
+      <button class="btn btn-ghost" onclick="irParaResultadoFinal()">
+        🏆 Resultado Final
+      </button>
+      <button class="btn btn-ghost" onclick="confirmarSairMenu()">← Menu</button>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+     TELA 5 — RESULTADO FINAL
+══════════════════════════════════════════════════════════════════════════ -->
+<section id="tela-resultado-final" class="tela">
+  <div class="fundo-img" style="background-image: url('assets/imagens/resultado_final.png')"></div>
+  <div class="res-final-content card">
+    <h1>RESULTADO FINAL</h1>
+    <div class="res-label">MÉDIA GERAL</div>
+    <div id="res-final-media">0,0</div>
+    <div id="res-final-status" style="color:var(--cor-verde)">APROVADO!</div>
+    <div class="detalhes-materia" id="res-final-detalhes"></div>
+    <div class="res-final-btns">
+      <button class="btn btn-ouro" onclick="jogarNovamente()">🔄 Jogar Novamente</button>
+      <button class="btn btn-ghost" onclick="sairParaMenu()">← Menu Principal</button>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+     TELA 6 — PROFESSOR LOGIN
+══════════════════════════════════════════════════════════════════════════ -->
+<section id="tela-professor-login" class="tela">
+  <div class="fundo-img" style="background-image: url('assets/imagens/fundo_login.png')"></div>
+  <div class="card">
+    <h2 style="text-align:center;margin-bottom:28px">👨‍🏫 PROFESSOR</h2>
+    <div class="input-group">
+      <label>Usuário</label>
+      <input type="text" id="prof-usuario" placeholder="admin">
+    </div>
+    <div class="input-group">
+      <label>Senha</label>
+      <input type="password" id="prof-senha" placeholder="••••••">
+    </div>
+    <button class="btn btn-ouro" onclick="loginProfessor()">ENTRAR</button>
+    <button class="btn btn-ghost" style="margin-top:10px" onclick="irPara('tela-login')">← Voltar</button>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+     TELA 7 — PROFESSOR PAINEL
+══════════════════════════════════════════════════════════════════════════ -->
+<section id="tela-professor-painel" class="tela" style="align-items:stretch;padding:0">
+  <div style="
+    min-height:100vh; width:100%; padding:24px;
+    background: linear-gradient(135deg, #0d0d2b, #1a1a3e);
+    display:flex; flex-direction:column; gap:20px;
+  ">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+      <h2 style="font-family:var(--fonte-titulo);color:var(--cor-ouro)">👨‍🏫 PAINEL DO PROFESSOR</h2>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn btn-verde" style="width:auto;padding:10px 20px"
+                onclick="Professor.exportarCSV()">⬇ Exportar CSV</button>
+        <button class="btn btn-ghost" style="width:auto;padding:10px 20px"
+                onclick="Professor.carregar()">🔄 Atualizar</button>
+        <button class="btn btn-vermelho" style="width:auto;padding:10px 20px"
+                onclick="irPara('tela-professor-login')">← Sair</button>
+      </div>
+    </div>
+
+    <div style="
+      background:rgba(255,255,255,0.05);
+      border:1px solid rgba(237,178,26,0.2);
+      border-radius:16px; padding:20px;
+    ">
+      <p style="font-size:0.85rem;color:rgba(255,255,255,0.5);margin-bottom:4px">Total de alunos</p>
+      <p id="prof-total" style="font-family:var(--fonte-titulo);font-size:2rem;color:var(--cor-ouro)">0</p>
+    </div>
+
+    <div style="overflow-x:auto;border-radius:16px;border:1px solid rgba(255,255,255,0.1)">
+      <table style="width:100%;border-collapse:collapse;font-size:0.9rem">
+        <thead>
+          <tr style="background:rgba(237,178,26,0.15)">
+            <th style="padding:14px 16px;text-align:left;color:var(--cor-ouro);font-family:var(--fonte-titulo);letter-spacing:1px">NOME</th>
+            <th style="padding:14px 16px;text-align:left;color:var(--cor-ouro);font-family:var(--fonte-titulo)">TURMA</th>
+            <th style="padding:14px 16px;text-align:center;color:var(--cor-mat);font-family:var(--fonte-titulo)">MATEMÁTICA</th>
+            <th style="padding:14px 16px;text-align:center;color:var(--cor-port);font-family:var(--fonte-titulo)">PORTUGUÊS</th>
+            <th style="padding:14px 16px;text-align:center;color:var(--cor-ouro);font-family:var(--fonte-titulo)">MÉDIA</th>
+          </tr>
+        </thead>
+        <tbody id="prof-tabela-body">
+          <tr><td colspan="5" style="text-align:center;padding:24px;opacity:0.5">Carregando...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<script src="js/game.js"></script>
+<script src="js/quiz.js"></script>
+<script src="js/professor.js"></script>
+<script>
+// ── Inicialização ────────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', async () => {
+  await Quiz.carregarBanco();
+});
+
+// ── Login do Aluno ───────────────────────────────────────────────────────────
+function fazerLogin() {
+  const nome  = document.getElementById('input-nome').value.trim();
+  const turma = document.getElementById('input-turma').value.trim();
+  if (!nome)  { mostrarToast('Digite seu nome!', 'erro'); return; }
+  if (!turma) { mostrarToast('Digite o código da turma!', 'erro'); return; }
+
+  Session.nomeAluno   = nome;
+  Session.codigoTurma = turma;
+
+  document.getElementById('mapa-aluno-nome').textContent = `Olá, ${nome}! 👋`;
+  atualizarMapa();
+  irPara('tela-mapa');
+}
+
+// ── Mapa ─────────────────────────────────────────────────────────────────────
+function atualizarMapa() {
+  ['matematica','portugues'].forEach(mundo => {
+    const nota    = Session.obterNota(mundo);
+    const bloco   = document.getElementById(`bloco-${mundo}`);
+    const notaEl  = document.getElementById(`nota-${mundo}`);
+    if (nota > 0) {
+      bloco?.classList.add('completo');
+      if (notaEl) { notaEl.textContent = `${nota} pts ${calcularEstrelas(nota)}`; notaEl.style.display = 'block'; }
+    } else {
+      bloco?.classList.remove('completo');
+      if (notaEl) notaEl.style.display = 'none';
+    }
+  });
+}
+
+function iniciarMundo(mundo) {
+  if (Session.obterNota(mundo) > 0) {
+    const nomes = { matematica:'Matemática', portugues:'Português' };
+    const faltam = ['matematica','portugues'].filter(m => Session.obterNota(m) <= 0 && m !== mundo);
+    const msg = faltam.length
+      ? `Você já completou ${nomes[mundo]}!\nFaltam: ${faltam.map(m=>nomes[m]).join(', ')}`
+      : `Você já completou ${nomes[mundo]}!\nTodos os blocos concluídos!`;
+    mostrarToast(msg, 'erro');
+    return;
+  }
+  const tag = document.getElementById('quiz-mundo-tag');
+  if (tag) tag.textContent = mundo === 'matematica' ? 'MATEMÁTICA' : 'PORTUGUÊS';
+  Quiz.iniciar(mundo);
+}
+
+function voltarMapa() {
+  atualizarMapa();
+  irPara('tela-mapa');
+}
+
+function irParaResultadoFinal() {
+  if (Session.totalCompletos() < 2) {
+    mostrarToast('Complete os 2 blocos para ver o Resultado Final!', 'erro');
+    return;
+  }
+  exibirResultadoFinal();
+  irPara('tela-resultado-final');
+}
+
+function confirmarSairMenu() {
+  mostrarPopup(
+    'Deseja voltar ao menu?\nSua sessão será reiniciada.',
+    () => sairParaMenu(),
+    null
+  );
+}
+
+function confirmarSairQuiz() {
+  mostrarPopup(
+    'Deseja sair do quiz?\nSua sessão será reiniciada.',
+    () => sairParaMenu(),
+    null
+  );
+}
+
+function sairParaMenu() {
+  Session.resetar();
+  document.getElementById('input-nome').value  = '';
+  document.getElementById('input-turma').value = '';
+  irPara('tela-login');
+}
+
+function jogarNovamente() {
+  Session.resetar();
+  atualizarMapa();
+  irPara('tela-mapa');
+}
+
+// ── Resultado Final ───────────────────────────────────────────────────────────
+function exibirResultadoFinal() {
+  const media    = Session.calcularMedia();
+  const aprovado = media >= 6;
+
+  document.getElementById('res-final-media').textContent =
+    media.toFixed(1).replace('.', ',');
+  const status = document.getElementById('res-final-status');
+  status.textContent = aprovado ? 'APROVADO! 🎉' : 'TENTE NOVAMENTE 💪';
+  status.style.color = aprovado ? 'var(--cor-verde)' : 'var(--cor-vermelho)';
+
+  const detalhes = document.getElementById('res-final-detalhes');
+  const config = {
+    matematica: { nome: 'Matemática', classe: 'mat' },
+    portugues:  { nome: 'Português',  classe: 'port' }
+  };
+  detalhes.innerHTML = Object.entries(config).map(([id, cfg]) => {
+    const nota = Session.obterNota(id);
+    return nota > 0
+      ? `<div class="detalhe-item ${cfg.classe}">
+           <span class="detalhe-nome">${cfg.nome}</span>
+           <span class="detalhe-nota">${nota} ${calcularEstrelas(nota)}</span>
+         </div>`
+      : '';
+  }).join('');
+}
+
+// ── Login Professor ───────────────────────────────────────────────────────────
+function loginProfessor() {
+  const u = document.getElementById('prof-usuario').value.trim();
+  const s = document.getElementById('prof-senha').value.trim();
+  if (u === 'admin' && s === '123') {
+    irPara('tela-professor-painel');
+    Professor.carregar();
+  } else {
+    mostrarToast('Usuário ou senha incorretos!', 'erro');
+  }
+}
+</script>
+</body>
+</html>
