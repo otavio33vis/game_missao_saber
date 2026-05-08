@@ -6,239 +6,113 @@
   <title>Missão Saber</title>
   <link rel="stylesheet" href="css/style.css">
   <style>
-    /* ── Login ── */
-    #tela-login .logo {
-      font-family: var(--fonte-titulo);
-      font-size: clamp(2.5rem, 6vw, 4rem);
-      color: var(--cor-ouro);
-      text-align: center;
-      margin-bottom: 8px;
-      text-shadow: 3px 3px 0 rgba(0,0,0,0.6), 0 0 30px rgba(237,178,26,0.4);
-    }
-    #tela-login .subtitulo {
-      text-align: center;
-      color: rgba(255,255,255,0.6);
-      font-size: 0.9rem;
-      margin-bottom: 32px;
-    }
+    #tela-login { justify-content:flex-end; align-items:center; padding-bottom:60px; }
+    .login-btns { display:flex; flex-direction:column; align-items:center; gap:14px; width:100%; max-width:340px; }
+    #modal-dados { display:none; position:fixed; inset:0; z-index:150; align-items:center; justify-content:center; background:rgba(0,0,0,0.6); backdrop-filter:blur(6px); }
+    #modal-dados.ativo { display:flex; }
+    #modal-dados .modal-box { background:rgba(10,10,30,0.95); border:1px solid rgba(237,178,26,0.4); border-radius:20px; padding:36px 32px; width:100%; max-width:400px; box-shadow:0 0 40px rgba(237,178,26,0.2); animation:popIn 0.3s ease; }
+    #modal-dados h3 { font-family:var(--fonte-titulo); color:var(--cor-ouro); font-size:1.4rem; text-align:center; margin-bottom:24px; }
+    #tela-mapa .mapa-content { display:flex; flex-direction:column; align-items:center; gap:24px; padding:40px 20px; }
+    .mapa-blocos { display:flex; gap:24px; flex-wrap:wrap; justify-content:center; }
+    .bloco-mundo { width:220px; height:220px; border-radius:24px; border:3px solid rgba(255,255,255,0.2); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; cursor:pointer; transition:transform .3s,box-shadow .3s,border-color .3s; position:relative; overflow:hidden; background-size:contain; background-position:center; }
+    .bloco-mundo::before { content:''; position:absolute; inset:0; background:rgba(0,0,0,0.45); transition:background .3s; }
+    .bloco-mundo:hover { transform:translateY(-8px) scale(1.04); box-shadow:0 16px 50px rgba(237,178,26,0.5); border-color:var(--cor-ouro); animation:pulse-bloco 1.5s ease-in-out infinite; }
+    @keyframes pulse-bloco { 0%,100%{box-shadow:0 16px 50px rgba(237,178,26,0.5)} 50%{box-shadow:0 16px 60px rgba(237,178,26,0.8)} }
+    .bloco-mundo:hover::before { background:rgba(0,0,0,0.2); }
+    .bloco-mundo.completo { border-color:var(--cor-verde); }
+    .bloco-mundo.completo::after { content:'✓'; position:absolute; top:10px; right:14px; color:var(--cor-verde); font-size:1.4rem; font-weight:900; z-index:2; }
+    .bloco-mundo>* { position:relative; z-index:1; }
+    .bloco-nome { font-family:var(--fonte-titulo); font-size:1.4rem; letter-spacing:2px; text-shadow:2px 2px 0 rgba(0,0,0,0.9); }
+    .bloco-nota { font-size:0.85rem; font-weight:700; color:var(--cor-ouro); background:rgba(0,0,0,0.7); padding:4px 12px; border-radius:20px; }
+    .bloco-icone { font-size:2.5rem; }
+    .mapa-aluno { font-size:1rem; color:rgba(255,255,255,0.8); font-weight:700; background:rgba(0,0,0,0.4); padding:8px 20px; border-radius:20px; }
+    #tela-quiz { align-items:stretch; padding:0; }
+    .quiz-layout { display:flex; flex-direction:column; min-height:100vh; width:100%; padding:20px; gap:16px; }
+    .quiz-header { display:flex; align-items:center; justify-content:space-between; gap:16px; }
+    .quiz-mundo-tag { font-family:var(--fonte-titulo); font-size:0.9rem; letter-spacing:2px; color:var(--cor-tema-botao,var(--cor-ouro)); background:rgba(0,0,0,0.5); padding:6px 16px; border-radius:20px; }
+    #quiz-contador { font-weight:800; font-size:0.9rem; color:rgba(255,255,255,0.7); }
+    #quiz-img-box { display:none; text-align:center; }
+    #quiz-img { max-height:180px; max-width:100%; border-radius:12px; object-fit:contain; }
+    #quiz-pergunta { font-size:clamp(1rem,2.5vw,1.3rem); font-weight:700; line-height:1.5; background:rgba(0,0,0,0.65); padding:20px; border-radius:16px; border-left:4px solid var(--cor-tema-botao,var(--cor-ouro)); }
+    #quiz-alternativas { display:flex; flex-direction:column; gap:10px; flex:1; }
+    .btn-alternativa { display:flex; align-items:center; gap:14px; padding:14px 18px; border-radius:14px; border:2px solid rgba(255,255,255,0.15); background:var(--cor-tema-botao,rgba(255,255,255,0.08)); color:var(--cor-tema-texto,#fff); font-family:var(--fonte-corpo); font-size:0.95rem; font-weight:700; cursor:pointer; text-align:left; transition:transform .2s,border-color .2s,background .2s; }
+    .btn-alternativa:hover:not(:disabled) { transform:translateX(4px); border-color:rgba(255,255,255,0.4); }
+    .btn-alternativa:disabled { cursor:default; }
+    .btn-alternativa.correta { background:var(--cor-verde)!important; border-color:var(--cor-verde)!important; color:#fff!important; transform:translateX(4px); }
+    .btn-alternativa.errada  { background:var(--cor-vermelho)!important; border-color:var(--cor-vermelho)!important; color:#fff!important; }
+    .badge-letra { min-width:32px; height:32px; background:var(--cor-tema-badge,#000); color:var(--cor-tema-texto,#fff); border-radius:8px; display:flex; align-items:center; justify-content:center; font-family:var(--fonte-titulo); font-size:0.9rem; flex-shrink:0; }
+    .btn-menu-quiz { background:rgba(0,0,0,0.5); border:2px solid rgba(255,255,255,0.2); color:#fff; padding:8px 16px; border-radius:20px; cursor:pointer; font-family:var(--fonte-titulo); font-size:0.85rem; transition:border-color .2s; width:auto; }
+    .btn-menu-quiz:hover { border-color:var(--cor-ouro); color:var(--cor-ouro); }
+    #tela-resultado-mundo .res-content { text-align:center; display:flex; flex-direction:column; align-items:center; gap:16px; padding:40px 20px; }
+    #res-mundo-nota { font-family:var(--fonte-titulo); font-size:5rem; color:var(--cor-ouro); text-shadow:4px 4px 0 rgba(0,0,0,0.5),0 0 40px rgba(237,178,26,0.5); line-height:1; }
+    .res-label { font-size:0.8rem; font-weight:700; color:rgba(255,255,255,0.5); text-transform:uppercase; letter-spacing:2px; }
+    #tela-resultado-final .res-final-content { text-align:center; display:flex; flex-direction:column; align-items:center; gap:20px; padding:40px 20px; max-width:560px; }
+    #res-final-media { font-family:var(--fonte-titulo); font-size:4rem; color:var(--cor-ouro); text-shadow:3px 3px 0 rgba(0,0,0,0.5); }
+    #res-final-status { font-family:var(--fonte-titulo); font-size:1.8rem; letter-spacing:2px; }
+    .detalhes-materia { display:flex; flex-direction:column; gap:10px; width:100%; }
+    .detalhe-item { display:flex; align-items:center; justify-content:space-between; background:rgba(255,255,255,0.06); border-radius:12px; padding:12px 20px; border-left:4px solid var(--cor-ouro); }
+    .detalhe-item.mat { border-color:var(--cor-mat); } .detalhe-item.port { border-color:var(--cor-port); }
+    .detalhe-nome { font-weight:800; font-size:1rem; }
+    .detalhe-nota { font-family:var(--fonte-titulo); font-size:1.3rem; color:var(--cor-ouro); }
+    .res-final-btns { display:flex; flex-direction:column; gap:12px; width:100%; max-width:320px; }
 
-    /* ── Menu Principal ── */
-    #tela-menu .menu-content {
-      display: flex; flex-direction: column;
-      align-items: center; gap: 16px;
-      padding: 40px 20px;
-    }
-    #tela-menu .menu-btns {
-      display: flex; flex-direction: column;
-      gap: 14px; width: 100%; max-width: 360px;
-    }
+    /* ── PROFESSOR ── */
+    .prof-painel { display:none; flex-direction:column; min-height:100vh; }
+    .prof-painel.ativo { display:flex; }
+    .prof-header { display:flex; align-items:center; justify-content:space-between; padding:16px 20px; background:rgba(0,0,0,0.4); border-bottom:1px solid rgba(255,215,0,0.2); gap:12px; flex-wrap:wrap; }
+    .prof-titulo { font-family:var(--fonte-titulo); font-size:1.1rem; color:var(--cor-ouro); letter-spacing:2px; flex:1; text-align:center; }
+    .prof-conteudo { flex:1; overflow-y:auto; padding:20px; max-width:700px; width:100%; margin:0 auto; }
+    .turma-card { background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.1); border-radius:16px; margin-bottom:12px; overflow:hidden; transition:border-color .2s; }
+    .turma-card.expandido { border-color:var(--cor-ouro); }
+    .turma-header-card { display:flex; align-items:center; gap:14px; padding:16px 20px; cursor:pointer; transition:background .2s; }
+    .turma-header-card:hover { background:rgba(255,255,255,0.05); }
+    .turma-inicial { width:44px; height:44px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:var(--fonte-titulo); font-size:1.2rem; flex-shrink:0; }
+    .turma-info { flex:1; }
+    .turma-nome-txt { font-weight:800; font-size:1rem; }
+    .turma-qtd-txt { font-size:0.8rem; color:rgba(255,255,255,0.5); margin-top:2px; }
+    .turma-cod-badge { background:rgba(255,215,0,0.15); border:1px solid rgba(255,215,0,0.4); color:var(--cor-ouro); font-family:var(--fonte-titulo); font-size:0.85rem; padding:4px 10px; border-radius:20px; letter-spacing:3px; }
+    .turma-seta { color:rgba(255,255,255,0.4); font-size:1rem; transition:transform .3s; user-select:none; }
+    .turma-card.expandido .turma-seta { transform:rotate(180deg); }
+    .materias-lista { display:none; flex-direction:column; gap:8px; padding:0 16px 16px; }
+    .turma-card.expandido .materias-lista { display:flex; }
+    .materia-btn-prof { display:flex; align-items:center; justify-content:space-between; padding:14px 18px; border-radius:12px; border:none; font-family:var(--fonte-corpo); font-weight:800; font-size:0.95rem; cursor:pointer; transition:transform .2s; color:#fff; }
+    .materia-btn-prof:hover { transform:translateX(4px); }
+    .materia-btn-prof.mat  { background:linear-gradient(135deg,#156FFF,#4D9FFF); }
+    .materia-btn-prof.port { background:linear-gradient(135deg,#059669,#2FF370); color:#001a0a; }
+    .mat-qtd { background:rgba(0,0,0,0.3); padding:3px 10px; border-radius:20px; font-size:0.8rem; }
+    .questao-item-prof { display:flex; align-items:center; gap:12px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:14px 16px; margin-bottom:10px; }
+    .questao-num-prof { min-width:28px; height:28px; border-radius:8px; background:rgba(255,215,0,0.15); color:var(--cor-ouro); font-family:var(--fonte-titulo); font-size:0.85rem; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .questao-txt-prof { flex:1; font-size:0.9rem; line-height:1.4; }
+    .questao-acoes-prof { display:flex; gap:6px; flex-shrink:0; }
+    .alt-row { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+    .alt-letra-badge { width:32px; height:32px; border-radius:8px; background:rgba(255,215,0,0.15); color:var(--cor-ouro); font-family:var(--fonte-titulo); display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:0.9rem; }
+    .alt-row input[type="text"] { flex:1; padding:10px 14px; border-radius:10px; border:2px solid rgba(255,255,255,0.15); background:rgba(255,255,255,0.06); color:#fff; font-family:var(--fonte-corpo); font-size:0.9rem; font-weight:600; outline:none; transition:border-color .2s; }
+    .alt-row input[type="text"]:focus { border-color:var(--cor-ouro); }
+    .alt-row input[type="radio"] { width:18px; height:18px; cursor:pointer; accent-color:var(--cor-ouro); }
+    .prof-empty { text-align:center; padding:48px 20px; color:rgba(255,255,255,0.35); font-size:0.95rem; }
+    .prof-empty-icon { font-size:3rem; margin-bottom:12px; }
+    #popup-nova-turma { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); backdrop-filter:blur(6px); z-index:200; align-items:center; justify-content:center; }
+    #popup-nova-turma.ativo { display:flex; }
+    .popup-nova-turma-box { background:linear-gradient(135deg,#1a1a3e,#0d0d2b); border:1px solid rgba(255,215,0,0.3); border-radius:20px; padding:32px; max-width:420px; width:90%; animation:popIn .3s ease; }
+    .popup-nova-turma-box h3 { font-family:var(--fonte-titulo); color:var(--cor-ouro); margin-bottom:20px; font-size:1.2rem; }
+    .popup-hint { font-size:0.8rem; color:rgba(255,255,255,0.5); margin-bottom:20px; text-align:center; }
+    .input-readonly { background:rgba(255,215,0,0.1)!important; border-color:rgba(255,215,0,0.5)!important; color:var(--cor-ouro)!important; font-family:var(--fonte-titulo)!important; font-size:1.3rem!important; text-align:center; letter-spacing:6px; }
+    .prof-aba { flex:1; padding:14px; border:none; font-family:var(--fonte-titulo); font-size:0.8rem; letter-spacing:1px; cursor:pointer; background:rgba(255,255,255,0.04); color:rgba(255,255,255,0.4); transition:background .2s,color .2s; border-radius:0; }
+    .prof-aba.ativa { background:rgba(255,215,0,0.12); color:var(--cor-ouro); border-top:2px solid var(--cor-ouro); }
 
-    /* ── Mapa ── */
-    #tela-mapa .mapa-content {
-      display: flex; flex-direction: column;
-      align-items: center; gap: 24px;
-      padding: 40px 20px;
-    }
-    .mapa-blocos {
-      display: flex; gap: 20px;
-      flex-wrap: wrap; justify-content: center;
-    }
-    .bloco-mundo {
-      width: 200px; height: 200px;
-      border-radius: 20px;
-      border: 3px solid rgba(255,255,255,0.2);
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      gap: 12px; cursor: pointer;
-      transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
-      position: relative; overflow: hidden;
-      background-size: cover; background-position: center;
-    }
-    .bloco-mundo::before {
-      content: ''; position: absolute; inset: 0;
-      background: rgba(0,0,0,0.45);
-      transition: background 0.3s;
-    }
-    .bloco-mundo:hover {
-      transform: translateY(-6px) scale(1.03);
-      box-shadow: 0 12px 40px rgba(237,178,26,0.4);
-      border-color: var(--cor-ouro);
-    }
-    .bloco-mundo:hover::before { background: rgba(0,0,0,0.25); }
-    .bloco-mundo.completo { border-color: var(--cor-verde); }
-    .bloco-mundo.completo::after {
-      content: '✓';
-      position: absolute; top: 10px; right: 14px;
-      color: var(--cor-verde); font-size: 1.4rem; font-weight: 900;
-      z-index: 2;
-    }
-    .bloco-mundo > * { position: relative; z-index: 1; }
-    .bloco-nome {
-      font-family: var(--fonte-titulo);
-      font-size: 1.3rem; letter-spacing: 2px;
-      text-shadow: 2px 2px 0 rgba(0,0,0,0.8);
-    }
-    .bloco-nota {
-      font-size: 0.85rem; font-weight: 700;
-      color: var(--cor-ouro);
-      background: rgba(0,0,0,0.6);
-      padding: 4px 10px; border-radius: 20px;
-    }
-    .mapa-aluno {
-      font-size: 1rem; color: rgba(255,255,255,0.7);
-      font-weight: 700;
-    }
-
-    /* ── Quiz ── */
-    #tela-quiz {
-      align-items: stretch;
-      padding: 0;
-    }
-    .quiz-layout {
-      display: flex; flex-direction: column;
-      min-height: 100vh; width: 100%;
-      padding: 20px;
-      gap: 16px;
-    }
-    .quiz-header {
-      display: flex; align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-    }
-    .quiz-mundo-tag {
-      font-family: var(--fonte-titulo);
-      font-size: 0.9rem; letter-spacing: 2px;
-      color: var(--cor-tema-botao, var(--cor-ouro));
-      background: rgba(0,0,0,0.5);
-      padding: 6px 16px; border-radius: 20px;
-    }
-    #quiz-contador {
-      font-weight: 800; font-size: 0.9rem;
-      color: rgba(255,255,255,0.7);
-    }
-    #quiz-img-box {
-      display: none; text-align: center;
-    }
-    #quiz-img {
-      max-height: 180px; max-width: 100%;
-      border-radius: 12px;
-      object-fit: contain;
-    }
-    #quiz-pergunta {
-      font-size: clamp(1rem, 2.5vw, 1.3rem);
-      font-weight: 700; line-height: 1.5;
-      background: rgba(0,0,0,0.6);
-      padding: 20px; border-radius: 16px;
-      border-left: 4px solid var(--cor-tema-botao, var(--cor-ouro));
-    }
-    #quiz-alternativas {
-      display: flex; flex-direction: column; gap: 10px;
-      flex: 1;
-    }
-    .btn-alternativa {
-      display: flex; align-items: center; gap: 14px;
-      padding: 14px 18px;
-      border-radius: 14px;
-      border: 2px solid rgba(255,255,255,0.15);
-      background: var(--cor-tema-botao, rgba(255,255,255,0.08));
-      color: var(--cor-tema-texto, #fff);
-      font-family: var(--fonte-corpo);
-      font-size: 0.95rem; font-weight: 700;
-      cursor: pointer; text-align: left;
-      transition: transform 0.2s, border-color 0.2s, background 0.2s;
-    }
-    .btn-alternativa:hover:not(:disabled) {
-      transform: translateX(4px);
-      border-color: rgba(255,255,255,0.4);
-    }
-    .btn-alternativa:disabled { cursor: default; }
-    .btn-alternativa.correta {
-      background: var(--cor-verde) !important;
-      border-color: var(--cor-verde) !important;
-      color: #fff !important;
-      transform: translateX(4px);
-    }
-    .btn-alternativa.errada {
-      background: var(--cor-vermelho) !important;
-      border-color: var(--cor-vermelho) !important;
-      color: #fff !important;
-    }
-    .badge-letra {
-      min-width: 32px; height: 32px;
-      background: var(--cor-tema-badge, #000);
-      color: var(--cor-tema-texto, #fff);
-      border-radius: 8px;
-      display: flex; align-items: center; justify-content: center;
-      font-family: var(--fonte-titulo); font-size: 0.9rem;
-      flex-shrink: 0;
-    }
-    .btn-menu-quiz {
-      background: rgba(0,0,0,0.5);
-      border: 2px solid rgba(255,255,255,0.2);
-      color: #fff; padding: 8px 16px;
-      border-radius: 20px; cursor: pointer;
-      font-family: var(--fonte-titulo); font-size: 0.85rem;
-      transition: border-color 0.2s;
-      width: auto;
-    }
-    .btn-menu-quiz:hover { border-color: var(--cor-ouro); color: var(--cor-ouro); }
-
-    /* ── Resultado Mundo ── */
-    #tela-resultado-mundo .res-content {
-      text-align: center;
-      display: flex; flex-direction: column;
-      align-items: center; gap: 16px;
-      padding: 40px 20px;
-    }
-    #res-mundo-nota {
-      font-family: var(--fonte-titulo);
-      font-size: 5rem; color: var(--cor-ouro);
-      text-shadow: 4px 4px 0 rgba(0,0,0,0.5), 0 0 40px rgba(237,178,26,0.5);
-      line-height: 1;
-    }
-    .res-label {
-      font-size: 0.8rem; font-weight: 700;
-      color: rgba(255,255,255,0.5);
-      text-transform: uppercase; letter-spacing: 2px;
-    }
-
-    /* ── Resultado Final ── */
-    #tela-resultado-final .res-final-content {
-      text-align: center;
-      display: flex; flex-direction: column;
-      align-items: center; gap: 20px;
-      padding: 40px 20px; max-width: 560px;
-    }
-    #res-final-media {
-      font-family: var(--fonte-titulo);
-      font-size: 4rem; color: var(--cor-ouro);
-      text-shadow: 3px 3px 0 rgba(0,0,0,0.5);
-    }
-    #res-final-status {
-      font-family: var(--fonte-titulo);
-      font-size: 1.8rem; letter-spacing: 2px;
-    }
-    .detalhes-materia {
-      display: flex; flex-direction: column; gap: 10px;
-      width: 100%;
-    }
-    .detalhe-item {
-      display: flex; align-items: center;
-      justify-content: space-between;
-      background: rgba(255,255,255,0.06);
-      border-radius: 12px; padding: 12px 20px;
-      border-left: 4px solid var(--cor-ouro);
-    }
-    .detalhe-item.mat  { border-color: var(--cor-mat); }
-    .detalhe-item.port { border-color: var(--cor-port); }
-    .detalhe-nome { font-weight: 800; font-size: 1rem; }
-    .detalhe-nota { font-family: var(--fonte-titulo); font-size: 1.3rem; color: var(--cor-ouro); }
-    .res-final-btns { display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 320px; }
+    /* ── Banco Global ── */
+    .banco-filtros { display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap; }
+    .banco-filtro-btn { padding:8px 18px; border:2px solid rgba(255,255,255,0.15); border-radius:50px; background:transparent; color:rgba(255,255,255,0.6); font-family:var(--fonte-titulo); font-size:0.8rem; cursor:pointer; transition:all .2s; }
+    .banco-filtro-btn.ativo { border-color:var(--cor-ouro); color:var(--cor-ouro); background:rgba(255,215,0,0.1); }
+    .banco-stat { display:flex; gap:12px; margin-bottom:16px; flex-wrap:wrap; }
+    .banco-stat-item { background:rgba(255,255,255,0.05); border:1px solid rgba(255,215,0,0.15); border-radius:12px; padding:12px 20px; flex:1; min-width:100px; text-align:center; }
+    .banco-stat-num { font-family:var(--fonte-titulo); font-size:1.8rem; color:var(--cor-ouro); }
+    .banco-stat-label { font-size:0.75rem; color:rgba(255,255,255,0.4); margin-top:2px; }
   </style>
 </head>
 <body>
 
-<!-- ── POPUP GLOBAL ── -->
+<!-- POPUP GLOBAL -->
 <div id="popup-overlay" class="popup-overlay">
   <div class="popup-box">
     <p id="popup-txt"></p>
@@ -249,86 +123,91 @@
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════════════════════════════════════
-     TELA 1 — LOGIN DO ALUNO
-══════════════════════════════════════════════════════════════════════════ -->
-<section id="tela-login" class="tela ativa">
-  <div class="fundo-img" id="login-fundo" style="background-image: url('assets/imagens/menu.png')"></div>
-  <div class="card fade-enter">
-    <div class="logo">🎓 MISSÃO SABER</div>
-    <p class="subtitulo">Quiz Educativo — Escola Municipal</p>
+<!-- MODAL ALUNO -->
+<div id="modal-dados">
+  <div class="modal-box">
+    <h3>🎓 Quem é você?</h3>
     <div class="input-group">
-      <label>Seu Nome</label>
+      <label>Seu Nome *</label>
       <input type="text" id="input-nome" placeholder="Digite seu nome completo" maxlength="50">
     </div>
     <div class="input-group">
-      <label>Código da Turma</label>
+      <label>Código da Turma (opcional)</label>
       <input type="text" id="input-turma" placeholder="Ex: 1234" maxlength="6">
     </div>
-    <button class="btn btn-ouro" onclick="fazerLogin()">▶ JOGAR</button>
-    <br>
-    <button class="btn btn-ghost" style="margin-top:10px" onclick="irPara('tela-professor-login')">
-      👨‍🏫 Modo Professor
-    </button>
+    <button class="btn btn-ouro" onclick="confirmarDados()" style="margin-bottom:10px">▶ JOGAR</button>
+    <button class="btn btn-ghost" onclick="fecharModal()">← Cancelar</button>
+  </div>
+</div>
+
+<!-- POPUP NOVA TURMA -->
+<div id="popup-nova-turma">
+  <div class="popup-nova-turma-box">
+    <h3>🏫 Nova Turma</h3>
+    <div class="input-group">
+      <label>Nome da Turma</label>
+      <input type="text" id="nova-turma-nome" placeholder="Ex: 5 Ano A" maxlength="30">
+    </div>
+    <div class="input-group">
+      <label>Código da Turma</label>
+      <input type="text" id="nova-turma-codigo" class="input-readonly" readonly>
+    </div>
+    <p class="popup-hint">📢 Mostre este código para seus alunos</p>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-ghost" style="flex:1" onclick="fecharPopupTurma()">CANCELAR</button>
+      <button class="btn btn-verde" style="flex:1" onclick="criarTurma()">✓ CRIAR</button>
+    </div>
+  </div>
+</div>
+
+<!-- TELA 1 — LOGIN -->
+<section id="tela-login" class="tela ativa">
+  <div class="fundo-img" style="background-image:url('assets/imagens/menu.png');background-size:cover;background-position:center"></div>
+  <div class="login-btns fade-enter" style="position:absolute;bottom:30%;left:50%;transform:translateX(-50%);z-index:2;width:auto">
+    <button class="btn btn-ouro" style="font-size:1.3rem;padding:18px 48px" onclick="abrirModal()">▶ JOGAR</button>
+    <button class="btn btn-ghost" onclick="irProfessor()">👨‍🏫 Modo Professor</button>
   </div>
 </section>
 
-<!-- ══════════════════════════════════════════════════════════════════════════
-     TELA 2 — MAPA
-══════════════════════════════════════════════════════════════════════════ -->
+<!-- TELA 2 — MAPA -->
 <section id="tela-mapa" class="tela">
-  <div class="fundo-img" style="background-image: url('assets/imagens/mapa.png')"></div>
+  <div class="fundo-img" style="background-image:url('assets/imagens/login.png')"></div>
   <div class="mapa-content">
-    <h1>ESCOLA MUNICIPAL</h1>
     <p class="mapa-aluno" id="mapa-aluno-nome"></p>
     <div class="mapa-blocos">
-      <div class="bloco-mundo" id="bloco-matematica"
-           style="background-image: url('assets/imagens/quiz_matematica.png')"
-           onclick="iniciarMundo('matematica')">
-        <div class="bloco-nome">MATEMÁTICA</div>
+      <div class="bloco-mundo" id="bloco-matematica" style="background-image:url('assets/imagens/quiz_matematica.png')" onclick="iniciarMundo('matematica')">
+        <div class="bloco-icone">📐</div><div class="bloco-nome">MATEMÁTICA</div>
         <div class="bloco-nota" id="nota-matematica" style="display:none"></div>
       </div>
-      <div class="bloco-mundo" id="bloco-portugues"
-           style="background-image: url('assets/imagens/quiz_portugues.png')"
-           onclick="iniciarMundo('portugues')">
-        <div class="bloco-nome">PORTUGUÊS</div>
+      <div class="bloco-mundo" id="bloco-portugues" style="background-image:url('assets/imagens/quiz_historia.png')" onclick="iniciarMundo('portugues')">
+        <div class="bloco-icone">📖</div><div class="bloco-nome">PORTUGUÊS</div>
         <div class="bloco-nota" id="nota-portugues" style="display:none"></div>
       </div>
     </div>
-    <div style="display:flex;gap:12px;margin-top:8px">
-      <button class="btn btn-ouro" style="width:auto;padding:12px 28px"
-              onclick="irParaResultadoFinal()">🏆 Resultado Final</button>
-      <button class="btn btn-ghost" style="width:auto;padding:12px 28px"
-              onclick="confirmarSairMenu()">← Menu</button>
+    <div style="display:flex;gap:12px;margin-top:8px;flex-wrap:wrap;justify-content:center">
+      <button class="btn btn-ouro" style="width:auto;padding:12px 28px" onclick="irParaResultadoFinal()">🏆 Resultado Final</button>
+      <button class="btn btn-ghost" style="width:auto;padding:12px 28px" onclick="confirmarSairMenu()">← Menu</button>
     </div>
   </div>
 </section>
 
-<!-- ══════════════════════════════════════════════════════════════════════════
-     TELA 3 — QUIZ
-══════════════════════════════════════════════════════════════════════════ -->
+<!-- TELA 3 — QUIZ -->
 <section id="tela-quiz" class="tela">
   <div class="fundo-img" id="quiz-fundo"></div>
   <div class="quiz-layout">
     <div class="quiz-header">
       <div class="quiz-mundo-tag" id="quiz-mundo-tag">MATEMÁTICA</div>
-      <div class="progress-bar" style="flex:1;margin:0">
-        <div class="progress-fill" id="quiz-progress" style="width:0%"></div>
-      </div>
+      <div class="progress-bar" style="flex:1;margin:0"><div class="progress-fill" id="quiz-progress" style="width:0%"></div></div>
       <span id="quiz-contador">1 / 10</span>
       <button class="btn btn-menu-quiz" onclick="confirmarSairQuiz()">☰ MENU</button>
     </div>
-    <div id="quiz-img-box">
-      <img id="quiz-img" src="" alt="Imagem da questão">
-    </div>
+    <div id="quiz-img-box"><img id="quiz-img" src="" alt="Imagem da questão"></div>
     <div id="quiz-pergunta"></div>
     <div id="quiz-alternativas"></div>
   </div>
 </section>
 
-<!-- ══════════════════════════════════════════════════════════════════════════
-     TELA 4 — RESULTADO DO MUNDO
-══════════════════════════════════════════════════════════════════════════ -->
+<!-- TELA 4 — RESULTADO MUNDO -->
 <section id="tela-resultado-mundo" class="tela">
   <div class="fundo-img" id="res-mundo-fundo"></div>
   <div class="res-content">
@@ -338,22 +217,16 @@
     <div class="estrelas" id="res-mundo-estrelas">★</div>
     <p id="res-mundo-msg" style="font-size:1.2rem;font-weight:700"></p>
     <div style="display:flex;flex-direction:column;gap:12px;width:100%;max-width:320px;margin-top:8px">
-      <button class="btn btn-ouro" id="btn-proximo-mundo" onclick="voltarMapa()">
-        🌍 Próximo Mundo
-      </button>
-      <button class="btn btn-ghost" onclick="irParaResultadoFinal()">
-        🏆 Resultado Final
-      </button>
+      <button class="btn btn-ouro" onclick="voltarMapa()">🌍 Próximo Mundo</button>
+      <button class="btn btn-ghost" onclick="irParaResultadoFinal()">🏆 Resultado Final</button>
       <button class="btn btn-ghost" onclick="confirmarSairMenu()">← Menu</button>
     </div>
   </div>
 </section>
 
-<!-- ══════════════════════════════════════════════════════════════════════════
-     TELA 5 — RESULTADO FINAL
-══════════════════════════════════════════════════════════════════════════ -->
+<!-- TELA 5 — RESULTADO FINAL -->
 <section id="tela-resultado-final" class="tela">
-  <div class="fundo-img" style="background-image: url('assets/imagens/resultado_final.png')"></div>
+  <div class="fundo-img" style="background-image:url('assets/imagens/resultado_final.png')"></div>
   <div class="res-final-content card">
     <h1>RESULTADO FINAL</h1>
     <div class="res-label">MÉDIA GERAL</div>
@@ -367,11 +240,9 @@
   </div>
 </section>
 
-<!-- ══════════════════════════════════════════════════════════════════════════
-     TELA 6 — PROFESSOR LOGIN
-══════════════════════════════════════════════════════════════════════════ -->
+<!-- TELA 6 — PROFESSOR LOGIN -->
 <section id="tela-professor-login" class="tela">
-  <div class="fundo-img" style="background-image: url('assets/imagens/fundo_login.png')"></div>
+  <div class="fundo-img" style="background-image:url('assets/imagens/fundo_login.png')"></div>
   <div class="card">
     <h2 style="text-align:center;margin-bottom:28px">👨‍🏫 PROFESSOR</h2>
     <div class="input-group">
@@ -380,59 +251,157 @@
     </div>
     <div class="input-group">
       <label>Senha</label>
-      <input type="password" id="prof-senha" placeholder="••••••">
+      <input type="password" id="prof-senha" placeholder="••••••"
+             onkeydown="if(event.key==='Enter') loginProfessor()">
     </div>
     <button class="btn btn-ouro" onclick="loginProfessor()">ENTRAR</button>
     <button class="btn btn-ghost" style="margin-top:10px" onclick="irPara('tela-login')">← Voltar</button>
   </div>
 </section>
 
-<!-- ══════════════════════════════════════════════════════════════════════════
-     TELA 7 — PROFESSOR PAINEL
-══════════════════════════════════════════════════════════════════════════ -->
-<section id="tela-professor-painel" class="tela" style="align-items:stretch;padding:0">
-  <div style="
-    min-height:100vh; width:100%; padding:24px;
-    background: linear-gradient(135deg, #0d0d2b, #1a1a3e);
-    display:flex; flex-direction:column; gap:20px;
-  ">
-    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
-      <h2 style="font-family:var(--fonte-titulo);color:var(--cor-ouro)">👨‍🏫 PAINEL DO PROFESSOR</h2>
-      <div style="display:flex;gap:10px;flex-wrap:wrap">
-        <button class="btn btn-verde" style="width:auto;padding:10px 20px"
-                onclick="Professor.exportarCSV()">⬇ Exportar CSV</button>
-        <button class="btn btn-ghost" style="width:auto;padding:10px 20px"
-                onclick="Professor.carregar()">🔄 Atualizar</button>
-        <button class="btn btn-vermelho" style="width:auto;padding:10px 20px"
-                onclick="irPara('tela-professor-login')">← Sair</button>
+<!-- TELA 7 — PROFESSOR PAINEL -->
+<section id="tela-professor-painel" class="tela" style="align-items:stretch;padding:0;background:linear-gradient(135deg,#0d0d2b,#1a1a3e)">
+
+  <!-- PAINEL A: TURMAS -->
+  <div id="prof-painel-turmas" class="prof-painel ativo">
+    <div class="prof-header">
+      <button class="btn btn-ghost btn-sm" onclick="sairProfessor()" style="width:auto;padding:8px 16px">← Sair</button>
+      <span class="prof-titulo">MINHAS TURMAS</span>
+      <button class="btn btn-ouro btn-sm" onclick="abrirPopupTurma()" style="width:auto;padding:8px 16px">+ Nova Turma</button>
+    </div>
+    <div class="prof-conteudo">
+      <div id="lista-turmas">
+        <div class="prof-empty"><div class="prof-empty-icon">🏫</div>Nenhuma turma cadastrada ainda.<br>Clique em "+ Nova Turma" para começar.</div>
       </div>
     </div>
+  </div>
 
-    <div style="
-      background:rgba(255,255,255,0.05);
-      border:1px solid rgba(237,178,26,0.2);
-      border-radius:16px; padding:20px;
-    ">
-      <p style="font-size:0.85rem;color:rgba(255,255,255,0.5);margin-bottom:4px">Total de alunos</p>
-      <p id="prof-total" style="font-family:var(--fonte-titulo);font-size:2rem;color:var(--cor-ouro)">0</p>
+  <!-- PAINEL B: QUESTÕES DA TURMA -->
+  <div id="prof-painel-questoes" class="prof-painel">
+    <div class="prof-header">
+      <button class="btn btn-ghost btn-sm" onclick="profIrPara('prof-painel-turmas')" style="width:auto;padding:8px 16px">← Voltar</button>
+      <span class="prof-titulo" id="prof-questoes-titulo">MATEMÁTICA</span>
+      <button class="btn btn-ouro btn-sm" onclick="abrirFormQuestao(null)" style="width:auto;padding:8px 16px">+ Nova Questão</button>
     </div>
+    <div class="prof-conteudo"><div id="prof-lista-questoes"></div></div>
+  </div>
 
-    <div style="overflow-x:auto;border-radius:16px;border:1px solid rgba(255,255,255,0.1)">
-      <table style="width:100%;border-collapse:collapse;font-size:0.9rem">
-        <thead>
-          <tr style="background:rgba(237,178,26,0.15)">
-            <th style="padding:14px 16px;text-align:left;color:var(--cor-ouro);font-family:var(--fonte-titulo);letter-spacing:1px">NOME</th>
-            <th style="padding:14px 16px;text-align:left;color:var(--cor-ouro);font-family:var(--fonte-titulo)">TURMA</th>
-            <th style="padding:14px 16px;text-align:center;color:var(--cor-mat);font-family:var(--fonte-titulo)">MATEMÁTICA</th>
-            <th style="padding:14px 16px;text-align:center;color:var(--cor-port);font-family:var(--fonte-titulo)">PORTUGUÊS</th>
-            <th style="padding:14px 16px;text-align:center;color:var(--cor-ouro);font-family:var(--fonte-titulo)">MÉDIA</th>
-          </tr>
-        </thead>
-        <tbody id="prof-tabela-body">
-          <tr><td colspan="5" style="text-align:center;padding:24px;opacity:0.5">Carregando...</td></tr>
-        </tbody>
-      </table>
+  <!-- PAINEL C: FORMULÁRIO QUESTÃO TURMA -->
+  <div id="prof-painel-form" class="prof-painel">
+    <div class="prof-header">
+      <button class="btn btn-ghost btn-sm" onclick="profIrPara('prof-painel-questoes')" style="width:auto;padding:8px 16px">← Voltar</button>
+      <span class="prof-titulo" id="prof-form-titulo">NOVA QUESTÃO</span>
+      <div style="width:90px"></div>
     </div>
+    <div class="prof-conteudo">
+      <div class="input-group">
+        <label>Pergunta *</label>
+        <textarea id="prof-pergunta" rows="3" placeholder="Digite a pergunta aqui..." style="padding:12px 16px;border-radius:12px;border:2px solid rgba(255,215,0,.2);background:rgba(255,255,255,.06);color:#fff;font-family:var(--fonte-corpo);font-size:0.95rem;font-weight:600;outline:none;resize:vertical;width:100%"></textarea>
+      </div>
+      <div style="margin-bottom:10px">
+        <label style="font-size:0.8rem;font-weight:700;color:var(--cor-ouro);text-transform:uppercase;letter-spacing:1px">Alternativas — marque a correta ✓</label>
+      </div>
+      <div id="prof-alternativas"></div>
+      <div style="display:flex;gap:10px;margin-top:20px">
+        <button class="btn btn-ghost" style="flex:1" onclick="profIrPara('prof-painel-questoes')">CANCELAR</button>
+        <button class="btn btn-ouro" style="flex:1" onclick="salvarQuestaoProf()">💾 SALVAR</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAINEL D: BANCO GLOBAL -->
+  <div id="prof-painel-banco" class="prof-painel">
+    <div class="prof-header">
+      <button class="btn btn-ghost btn-sm" onclick="sairProfessor()" style="width:auto;padding:8px 16px">← Sair</button>
+      <span class="prof-titulo">BANCO GLOBAL</span>
+      <button class="btn btn-ouro btn-sm" onclick="abrirFormBanco(null)" style="width:auto;padding:8px 16px">+ Nova Questão</button>
+    </div>
+    <div class="prof-conteudo">
+      <div class="banco-stat">
+        <div class="banco-stat-item">
+          <div class="banco-stat-num" id="banco-total-mat">0</div>
+          <div class="banco-stat-label">📐 Matemática</div>
+        </div>
+        <div class="banco-stat-item">
+          <div class="banco-stat-num" id="banco-total-port">0</div>
+          <div class="banco-stat-label">📖 Português</div>
+        </div>
+      </div>
+      <div class="banco-filtros">
+        <button class="banco-filtro-btn ativo" id="filtro-todas" onclick="filtrarBanco('todas')">Todas</button>
+        <button class="banco-filtro-btn" id="filtro-matematica" onclick="filtrarBanco('matematica')">📐 Matemática</button>
+        <button class="banco-filtro-btn" id="filtro-portugues" onclick="filtrarBanco('portugues')">📖 Português</button>
+      </div>
+      <div id="banco-lista-questoes"></div>
+    </div>
+  </div>
+
+  <!-- PAINEL E: FORMULÁRIO BANCO GLOBAL -->
+  <div id="prof-painel-banco-form" class="prof-painel">
+    <div class="prof-header">
+      <button class="btn btn-ghost btn-sm" onclick="profIrPara('prof-painel-banco')" style="width:auto;padding:8px 16px">← Voltar</button>
+      <span class="prof-titulo" id="banco-form-titulo">NOVA QUESTÃO</span>
+      <div style="width:90px"></div>
+    </div>
+    <div class="prof-conteudo">
+      <div class="input-group">
+        <label>Matéria *</label>
+        <select id="banco-materia" style="padding:12px 16px;border-radius:12px;border:2px solid rgba(255,215,0,.2);background:rgba(255,255,255,.06);color:#fff;font-family:var(--fonte-corpo);font-size:0.95rem;outline:none;width:100%">
+          <option value="matematica">📐 Matemática</option>
+          <option value="portugues">📖 Português</option>
+        </select>
+      </div>
+      <div class="input-group">
+        <label>Pergunta *</label>
+        <textarea id="banco-pergunta" rows="3" placeholder="Digite a pergunta aqui..." style="padding:12px 16px;border-radius:12px;border:2px solid rgba(255,215,0,.2);background:rgba(255,255,255,.06);color:#fff;font-family:var(--fonte-corpo);font-size:0.95rem;font-weight:600;outline:none;resize:vertical;width:100%"></textarea>
+      </div>
+      <div style="margin-bottom:10px">
+        <label style="font-size:0.8rem;font-weight:700;color:var(--cor-ouro);text-transform:uppercase;letter-spacing:1px">Alternativas — marque a correta ✓</label>
+      </div>
+      <div id="banco-alternativas"></div>
+      <div style="display:flex;gap:10px;margin-top:20px">
+        <button class="btn btn-ghost" style="flex:1" onclick="profIrPara('prof-painel-banco')">CANCELAR</button>
+        <button class="btn btn-ouro" style="flex:1" onclick="salvarQuestaoNoBanco()">💾 SALVAR</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAINEL F: RESULTADOS -->
+  <div id="prof-painel-resultados" class="prof-painel">
+    <div class="prof-header">
+      <button class="btn btn-ghost btn-sm" onclick="sairProfessor()" style="width:auto;padding:8px 16px">← Sair</button>
+      <span class="prof-titulo">RESULTADOS</span>
+      <button class="btn btn-verde btn-sm" onclick="Professor.exportarCSV()" style="width:auto;padding:8px 16px">⬇ CSV</button>
+    </div>
+    <div class="prof-conteudo">
+      <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(237,178,26,0.2);border-radius:16px;padding:20px;margin-bottom:16px">
+        <p style="font-size:0.85rem;color:rgba(255,255,255,0.5);margin-bottom:4px">Total de alunos</p>
+        <p id="prof-total" style="font-family:var(--fonte-titulo);font-size:2rem;color:var(--cor-ouro)">0</p>
+      </div>
+      <div style="overflow-x:auto;border-radius:16px;border:1px solid rgba(255,255,255,0.1)">
+        <table style="width:100%;border-collapse:collapse;font-size:0.9rem">
+          <thead>
+            <tr style="background:rgba(237,178,26,0.15)">
+              <th style="padding:14px 16px;text-align:left;color:var(--cor-ouro);font-family:var(--fonte-titulo)">NOME</th>
+              <th style="padding:14px 16px;text-align:left;color:var(--cor-ouro);font-family:var(--fonte-titulo)">TURMA</th>
+              <th style="padding:14px 16px;text-align:center;color:var(--cor-mat);font-family:var(--fonte-titulo)">MAT</th>
+              <th style="padding:14px 16px;text-align:center;color:var(--cor-port);font-family:var(--fonte-titulo)">PORT</th>
+              <th style="padding:14px 16px;text-align:center;color:var(--cor-ouro);font-family:var(--fonte-titulo)">MÉDIA</th>
+            </tr>
+          </thead>
+          <tbody id="prof-tabela-body">
+            <tr><td colspan="5" style="text-align:center;padding:24px;opacity:0.5">Carregando...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- NAV BOTTOM -->
+  <div style="display:flex;border-top:1px solid rgba(255,255,255,0.1);background:rgba(0,0,0,0.4);flex-shrink:0">
+    <button class="prof-aba ativa" id="aba-turmas"     onclick="mostrarAbaPainel('turmas')">🏫 Turmas</button>
+    <button class="prof-aba"       id="aba-banco"      onclick="mostrarAbaPainel('banco')">📚 Banco</button>
+    <button class="prof-aba"       id="aba-resultados" onclick="mostrarAbaPainel('resultados')">📊 Resultados</button>
   </div>
 </section>
 
@@ -440,138 +409,344 @@
 <script src="js/quiz.js"></script>
 <script src="js/professor.js"></script>
 <script>
-// ── Inicialização ────────────────────────────────────────────────────────────
+// ── Init ──────────────────────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', async () => {
   await Quiz.carregarBanco();
 });
 
-// ── Login do Aluno ───────────────────────────────────────────────────────────
-function fazerLogin() {
+// ── Modal aluno ───────────────────────────────────────────────────────────────
+function abrirModal() { document.getElementById('modal-dados').classList.add('ativo'); document.getElementById('input-nome').focus(); }
+function fecharModal() { document.getElementById('modal-dados').classList.remove('ativo'); }
+function confirmarDados() {
   const nome  = document.getElementById('input-nome').value.trim();
   const turma = document.getElementById('input-turma').value.trim();
-  if (!nome)  { mostrarToast('Digite seu nome!', 'erro'); return; }
-  if (!turma) { mostrarToast('Digite o código da turma!', 'erro'); return; }
-
+  if (!nome) { mostrarToast('Digite seu nome!', 'erro'); return; }
   Session.nomeAluno   = nome;
-  Session.codigoTurma = turma;
-
+  Session.codigoTurma = turma || 'Livre';
+  fecharModal();
   document.getElementById('mapa-aluno-nome').textContent = `Olá, ${nome}! 👋`;
   atualizarMapa();
   irPara('tela-mapa');
 }
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('input-nome')?.addEventListener('keydown', e => { if(e.key==='Enter') confirmarDados(); });
+  document.getElementById('input-turma')?.addEventListener('keydown', e => { if(e.key==='Enter') confirmarDados(); });
+});
 
-// ── Mapa ─────────────────────────────────────────────────────────────────────
+// ── Mapa ──────────────────────────────────────────────────────────────────────
 function atualizarMapa() {
-  ['matematica','portugues'].forEach(mundo => {
-    const nota    = Session.obterNota(mundo);
-    const bloco   = document.getElementById(`bloco-${mundo}`);
-    const notaEl  = document.getElementById(`nota-${mundo}`);
-    if (nota > 0) {
-      bloco?.classList.add('completo');
-      if (notaEl) { notaEl.textContent = `${nota} pts ${calcularEstrelas(nota)}`; notaEl.style.display = 'block'; }
-    } else {
-      bloco?.classList.remove('completo');
-      if (notaEl) notaEl.style.display = 'none';
-    }
+  ['matematica','portugues'].forEach(m => {
+    const nota=Session.obterNota(m), bloco=document.getElementById(`bloco-${m}`), el=document.getElementById(`nota-${m}`);
+    if (nota>0) { bloco?.classList.add('completo'); if(el){el.textContent=`${nota} pts ${calcularEstrelas(nota)}`;el.style.display='block';} }
+    else { bloco?.classList.remove('completo'); if(el) el.style.display='none'; }
   });
 }
-
 function iniciarMundo(mundo) {
-  if (Session.obterNota(mundo) > 0) {
-    const nomes = { matematica:'Matemática', portugues:'Português' };
-    const faltam = ['matematica','portugues'].filter(m => Session.obterNota(m) <= 0 && m !== mundo);
-    const msg = faltam.length
-      ? `Você já completou ${nomes[mundo]}!\nFaltam: ${faltam.map(m=>nomes[m]).join(', ')}`
-      : `Você já completou ${nomes[mundo]}!\nTodos os blocos concluídos!`;
-    mostrarToast(msg, 'erro');
+  if (Session.obterNota(mundo)>0) {
+    const nomes={matematica:'Matemática',portugues:'Português'};
+    const faltam=['matematica','portugues'].filter(m=>Session.obterNota(m)<=0&&m!==mundo);
+    mostrarToast(faltam.length?`Você já completou ${nomes[mundo]}!\nFaltam: ${faltam.map(m=>nomes[m]).join(', ')}`:`Você já completou ${nomes[mundo]}!\nTodos os blocos concluídos!`,'erro');
     return;
   }
-  const tag = document.getElementById('quiz-mundo-tag');
-  if (tag) tag.textContent = mundo === 'matematica' ? 'MATEMÁTICA' : 'PORTUGUÊS';
+  const tag=document.getElementById('quiz-mundo-tag');
+  if(tag) tag.textContent=mundo==='matematica'?'MATEMÁTICA':'PORTUGUÊS';
   Quiz.iniciar(mundo);
 }
-
-function voltarMapa() {
-  atualizarMapa();
-  irPara('tela-mapa');
-}
-
+function voltarMapa() { atualizarMapa(); irPara('tela-mapa'); }
 function irParaResultadoFinal() {
-  if (Session.totalCompletos() < 2) {
-    mostrarToast('Complete os 2 blocos para ver o Resultado Final!', 'erro');
-    return;
-  }
-  exibirResultadoFinal();
-  irPara('tela-resultado-final');
+  if(Session.totalCompletos()<2){mostrarToast('Complete os 2 blocos para ver o Resultado Final!','erro');return;}
+  exibirResultadoFinal(); irPara('tela-resultado-final');
 }
+function confirmarSairMenu() { mostrarPopup('Deseja voltar ao menu?\nSua sessão será reiniciada.',()=>sairParaMenu(),null); }
+function confirmarSairQuiz()  { mostrarPopup('Deseja sair do quiz?\nSua sessão será reiniciada.',()=>sairParaMenu(),null); }
+function sairParaMenu() { Session.resetar(); document.getElementById('input-nome').value=''; document.getElementById('input-turma').value=''; irPara('tela-login'); }
+function jogarNovamente() { Session.resetar(); atualizarMapa(); irPara('tela-mapa'); }
 
-function confirmarSairMenu() {
-  mostrarPopup(
-    'Deseja voltar ao menu?\nSua sessão será reiniciada.',
-    () => sairParaMenu(),
-    null
-  );
-}
-
-function confirmarSairQuiz() {
-  mostrarPopup(
-    'Deseja sair do quiz?\nSua sessão será reiniciada.',
-    () => sairParaMenu(),
-    null
-  );
-}
-
-function sairParaMenu() {
-  Session.resetar();
-  document.getElementById('input-nome').value  = '';
-  document.getElementById('input-turma').value = '';
-  irPara('tela-login');
-}
-
-function jogarNovamente() {
-  Session.resetar();
-  atualizarMapa();
-  irPara('tela-mapa');
-}
-
-// ── Resultado Final ───────────────────────────────────────────────────────────
 function exibirResultadoFinal() {
-  const media    = Session.calcularMedia();
-  const aprovado = media >= 6;
-
-  document.getElementById('res-final-media').textContent =
-    media.toFixed(1).replace('.', ',');
-  const status = document.getElementById('res-final-status');
-  status.textContent = aprovado ? 'APROVADO! 🎉' : 'TENTE NOVAMENTE 💪';
-  status.style.color = aprovado ? 'var(--cor-verde)' : 'var(--cor-vermelho)';
-
-  const detalhes = document.getElementById('res-final-detalhes');
-  const config = {
-    matematica: { nome: 'Matemática', classe: 'mat' },
-    portugues:  { nome: 'Português',  classe: 'port' }
-  };
-  detalhes.innerHTML = Object.entries(config).map(([id, cfg]) => {
-    const nota = Session.obterNota(id);
-    return nota > 0
-      ? `<div class="detalhe-item ${cfg.classe}">
-           <span class="detalhe-nome">${cfg.nome}</span>
-           <span class="detalhe-nota">${nota} ${calcularEstrelas(nota)}</span>
-         </div>`
-      : '';
+  const media=Session.calcularMedia(), aprovado=media>=6;
+  document.getElementById('res-final-media').textContent=media.toFixed(1).replace('.',',');
+  const s=document.getElementById('res-final-status');
+  s.textContent=aprovado?'APROVADO! 🎉':'TENTE NOVAMENTE 💪'; s.style.color=aprovado?'var(--cor-verde)':'var(--cor-vermelho)';
+  const cfg={matematica:{nome:'Matemática',classe:'mat'},portugues:{nome:'Português',classe:'port'}};
+  document.getElementById('res-final-detalhes').innerHTML=Object.entries(cfg).map(([id,c])=>{
+    const n=Session.obterNota(id);
+    return n>0?`<div class="detalhe-item ${c.classe}"><span class="detalhe-nome">${c.nome}</span><span class="detalhe-nota">${n} ${calcularEstrelas(n)}</span></div>`:'';
   }).join('');
 }
 
-// ── Login Professor ───────────────────────────────────────────────────────────
-function loginProfessor() {
-  const u = document.getElementById('prof-usuario').value.trim();
-  const s = document.getElementById('prof-senha').value.trim();
-  if (u === 'admin' && s === '123') {
+// ── Professor: sessão + navegação ─────────────────────────────────────────────
+function irProfessor() {
+  // Se já logado nesta sessão, vai direto pro painel
+  if (sessionStorage.getItem('prof_logado')==='true') {
     irPara('tela-professor-painel');
-    Professor.carregar();
+    mostrarAbaPainel('turmas');
   } else {
-    mostrarToast('Usuário ou senha incorretos!', 'erro');
+    irPara('tela-professor-login');
   }
 }
+
+function loginProfessor() {
+  const u=document.getElementById('prof-usuario').value.trim();
+  const s=document.getElementById('prof-senha').value.trim();
+  if (u==='admin' && s==='123') {
+    sessionStorage.setItem('prof_logado','true');
+    irPara('tela-professor-painel');
+    mostrarAbaPainel('turmas');
+  } else { mostrarToast('Usuário ou senha incorretos!','erro'); }
+}
+
+function sairProfessor() {
+  sessionStorage.removeItem('prof_logado');
+  irPara('tela-login'); // volta pro menu do aluno
+}
+
+function profIrPara(id) {
+  document.querySelectorAll('.prof-painel').forEach(p=>p.classList.remove('ativo'));
+  document.getElementById(id)?.classList.add('ativo');
+}
+
+function mostrarAbaPainel(aba) {
+  document.querySelectorAll('.prof-aba').forEach(a=>a.classList.remove('ativa'));
+  document.getElementById('aba-'+aba)?.classList.add('ativa');
+  if (aba==='turmas')     { profIrPara('prof-painel-turmas'); renderTurmas(); }
+  if (aba==='banco')      { profIrPara('prof-painel-banco'); renderBanco('todas'); }
+  if (aba==='resultados') { profIrPara('prof-painel-resultados'); Professor.carregar(); }
+}
+
+// ── LocalStorage turmas ───────────────────────────────────────────────────────
+const CORES_INICIAIS=['#156FFF','#2D6A4F','#8B1A1A','#b5860d','#6B21A8'];
+const LETRAS_PROF=['A','B','C','D','E'];
+const ProfEstado={ turma:null, materia:null, questaoEditando:null, bancoEditando:null, bancoFiltro:'todas' };
+
+function getTurmasLista() { return JSON.parse(localStorage.getItem('turmas_lista')||'[]'); }
+function getTurma(cod)    { return JSON.parse(localStorage.getItem('turma_'+cod)||'null'); }
+function salvarTurmaLS(t) { localStorage.setItem('turma_'+t.codigo, JSON.stringify(t)); }
+function salvarListaLS(l) { localStorage.setItem('turmas_lista', JSON.stringify(l)); }
+
+function gerarCodigo() {
+  const ex=getTurmasLista(); let cod;
+  do { cod=String(Math.floor(1000+Math.random()*9000)); } while(ex.includes(cod));
+  return cod;
+}
+function abrirPopupTurma() {
+  document.getElementById('nova-turma-nome').value='';
+  document.getElementById('nova-turma-codigo').value=gerarCodigo();
+  document.getElementById('popup-nova-turma').classList.add('ativo');
+  setTimeout(()=>document.getElementById('nova-turma-nome').focus(),100);
+}
+function fecharPopupTurma() { document.getElementById('popup-nova-turma').classList.remove('ativo'); }
+function criarTurma() {
+  const nome=document.getElementById('nova-turma-nome').value.trim();
+  const codigo=document.getElementById('nova-turma-codigo').value;
+  if(!nome){mostrarToast('Digite o nome da turma!','erro');return;}
+  salvarTurmaLS({codigo,nome,questoes:[]});
+  const lista=getTurmasLista(); lista.push(codigo); salvarListaLS(lista);
+  fecharPopupTurma(); renderTurmas();
+  mostrarToast(`Turma "${nome}" criada! Código: ${codigo}`);
+}
+
+function renderTurmas() {
+  const container=document.getElementById('lista-turmas');
+  const lista=getTurmasLista();
+  if(!lista.length){container.innerHTML='<div class="prof-empty"><div class="prof-empty-icon">🏫</div>Nenhuma turma cadastrada ainda.<br>Clique em "+ Nova Turma" para começar.</div>';return;}
+  container.innerHTML=lista.map((cod,i)=>{
+    const t=getTurma(cod); if(!t) return '';
+    const cor=CORES_INICIAIS[i%CORES_INICIAIS.length];
+    const qm=t.questoes.filter(q=>q.category==='matematica').length;
+    const qp=t.questoes.filter(q=>q.category==='portugues').length;
+    const tot=t.questoes.length;
+    return `<div class="turma-card" id="tcard-${cod}">
+      <div class="turma-header-card" onclick="toggleTurmaCard('${cod}')">
+        <div class="turma-inicial" style="background:${cor}">${t.nome.charAt(0).toUpperCase()}</div>
+        <div class="turma-info"><div class="turma-nome-txt">${t.nome}</div><div class="turma-qtd-txt">${tot} questão${tot!==1?'ões':''}</div></div>
+        <div class="turma-cod-badge">${cod}</div>
+        <div class="turma-seta">▼</div>
+      </div>
+      <div class="materias-lista">
+        <button class="materia-btn-prof mat" onclick="abrirQuestoesProf('${cod}','matematica')">📐 Matemática <span class="mat-qtd">${qm} questão${qm!==1?'ões':''}</span></button>
+        <button class="materia-btn-prof port" onclick="abrirQuestoesProf('${cod}','portugues')">📖 Português <span class="mat-qtd">${qp} questão${qp!==1?'ões':''}</span></button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleTurmaCard(cod) {
+  const card=document.getElementById('tcard-'+cod);
+  const exp=card.classList.contains('expandido');
+  document.querySelectorAll('.turma-card').forEach(c=>c.classList.remove('expandido'));
+  if(!exp) card.classList.add('expandido');
+}
+
+function abrirQuestoesProf(cod,materia) {
+  ProfEstado.turma=getTurma(cod); ProfEstado.materia=materia;
+  const nomes={matematica:'MATEMÁTICA',portugues:'PORTUGUÊS'};
+  document.getElementById('prof-questoes-titulo').textContent=`${nomes[materia]} — ${ProfEstado.turma.nome}`;
+  profIrPara('prof-painel-questoes'); renderQuestoesProf();
+}
+
+function renderQuestoesProf() {
+  const c=document.getElementById('prof-lista-questoes');
+  const qs=ProfEstado.turma.questoes.filter(q=>q.category===ProfEstado.materia);
+  if(!qs.length){c.innerHTML='<div class="prof-empty"><div class="prof-empty-icon">📝</div>Nenhuma questão cadastrada.<br>Clique em "+ Nova Questão".</div>';return;}
+  c.innerHTML=qs.map((q,i)=>`<div class="questao-item-prof">
+    <div class="questao-num-prof">${i+1}</div>
+    <div class="questao-txt-prof">${q.text}</div>
+    <div class="questao-acoes-prof">
+      <button class="btn btn-azul btn-sm" onclick="abrirFormQuestao('${q.id}')">✏️</button>
+      <button class="btn btn-vermelho btn-sm" onclick="excluirQuestaoProf('${q.id}')">✕</button>
+    </div>
+  </div>`).join('');
+}
+
+function abrirFormQuestao(id) {
+  ProfEstado.questaoEditando=id;
+  document.getElementById('prof-form-titulo').textContent=id?'EDITAR QUESTÃO':'NOVA QUESTÃO';
+  let perg='', alts=Array(5).fill(''), correta=0;
+  if(id){const q=ProfEstado.turma.questoes.find(x=>String(x.id)===String(id));if(q){perg=q.text;alts=[...q.answers];correta=q.correct_index;}}
+  document.getElementById('prof-pergunta').value=perg;
+  document.getElementById('prof-alternativas').innerHTML=LETRAS_PROF.map((l,i)=>`<div class="alt-row"><div class="alt-letra-badge">${l}</div><input type="text" id="prof-alt-${i}" placeholder="Alternativa ${l}" value="${alts[i]||''}"><input type="radio" name="prof-correta" value="${i}" ${correta===i?'checked':''}></div>`).join('');
+  profIrPara('prof-painel-form');
+}
+
+function salvarQuestaoProf() {
+  const perg=document.getElementById('prof-pergunta').value.trim();
+  if(!perg){mostrarToast('Digite a pergunta!','erro');return;}
+  const alts=LETRAS_PROF.map((_,i)=>document.getElementById('prof-alt-'+i).value.trim());
+  if(alts.some(a=>!a)){mostrarToast('Preencha todas as alternativas!','erro');return;}
+  const radio=document.querySelector('input[name="prof-correta"]:checked');
+  if(!radio){mostrarToast('Marque a alternativa correta!','erro');return;}
+  const turma=ProfEstado.turma, mat=ProfEstado.materia;
+  if(!ProfEstado.questaoEditando&&turma.questoes.filter(q=>q.category===mat).length>=10){mostrarToast('Máximo de 10 questões por matéria!','erro');return;}
+  const correta=parseInt(radio.value);
+  if(ProfEstado.questaoEditando){
+    const idx=turma.questoes.findIndex(q=>String(q.id)===String(ProfEstado.questaoEditando));
+    if(idx>=0){turma.questoes[idx].text=perg;turma.questoes[idx].answers=alts;turma.questoes[idx].correct_index=correta;}
+    mostrarToast('Questão atualizada!');
+  } else {
+    turma.questoes.push({id:Date.now(),category:mat,text:perg,answers:alts,correct_index:correta});
+    mostrarToast('Questão salva!');
+  }
+  salvarTurmaLS(turma); ProfEstado.turma=turma;
+  profIrPara('prof-painel-questoes'); renderQuestoesProf();
+}
+
+function excluirQuestaoProf(id) {
+  if(!confirm('Excluir esta questão?')) return;
+  const t=ProfEstado.turma; t.questoes=t.questoes.filter(q=>String(q.id)!==String(id));
+  salvarTurmaLS(t); ProfEstado.turma=t; renderQuestoesProf();
+  mostrarToast('Questão excluída.','erro');
+}
+
+// ── Banco Global ──────────────────────────────────────────────────────────────
+let bancoDados = { questions: [] };
+
+async function carregarBancoDados() {
+  try {
+    const r = await fetch('/data/question_bank.json');
+    bancoDados = await r.json();
+  } catch(e) { bancoDados = { questions: [] }; }
+}
+
+function filtrarBanco(filtro) {
+  ProfEstado.bancoFiltro = filtro;
+  document.querySelectorAll('.banco-filtro-btn').forEach(b => b.classList.remove('ativo'));
+  document.getElementById('filtro-'+filtro)?.classList.add('ativo');
+  renderBanco(filtro);
+}
+
+function renderBanco(filtro) {
+  const qs = bancoDados.questions || [];
+  const mat = qs.filter(q=>normalizar(q.category)==='matematica');
+  const port = qs.filter(q=>normalizar(q.category)==='portugues');
+
+  document.getElementById('banco-total-mat').textContent = mat.length;
+  document.getElementById('banco-total-port').textContent = port.length;
+
+  const filtradas = filtro==='todas' ? qs : qs.filter(q=>normalizar(q.category)===filtro);
+  const container = document.getElementById('banco-lista-questoes');
+
+  if(!filtradas.length){
+    container.innerHTML='<div class="prof-empty"><div class="prof-empty-icon">📚</div>Nenhuma questão encontrada.</div>';
+    return;
+  }
+  container.innerHTML = filtradas.map((q,i)=>`
+    <div class="questao-item-prof">
+      <div class="questao-num-prof">${i+1}</div>
+      <div style="flex:1">
+        <div style="font-size:0.75rem;color:rgba(255,255,255,0.4);margin-bottom:4px">${normalizar(q.category)==='matematica'?'📐 Matemática':'📖 Português'}</div>
+        <div class="questao-txt-prof">${q.text}</div>
+      </div>
+      <div class="questao-acoes-prof">
+        <button class="btn btn-azul btn-sm" onclick="abrirFormBanco(${q.id})">✏️</button>
+        <button class="btn btn-vermelho btn-sm" onclick="excluirDoBanco(${q.id})">✕</button>
+      </div>
+    </div>`).join('');
+}
+
+function abrirFormBanco(id) {
+  ProfEstado.bancoEditando = id;
+  document.getElementById('banco-form-titulo').textContent = id ? 'EDITAR QUESTÃO' : 'NOVA QUESTÃO';
+  let mat='matematica', perg='', alts=Array(5).fill(''), correta=0;
+  if(id) {
+    const q=(bancoDados.questions||[]).find(x=>x.id===id);
+    if(q){mat=normalizar(q.category);perg=q.text;alts=[...q.answers];correta=q.correct_index;}
+  }
+  document.getElementById('banco-materia').value=mat;
+  document.getElementById('banco-pergunta').value=perg;
+  document.getElementById('banco-alternativas').innerHTML=LETRAS_PROF.map((l,i)=>`
+    <div class="alt-row"><div class="alt-letra-badge">${l}</div>
+    <input type="text" id="banco-alt-${i}" placeholder="Alternativa ${l}" value="${alts[i]||''}">
+    <input type="radio" name="banco-correta" value="${i}" ${correta===i?'checked':''}></div>`).join('');
+  profIrPara('prof-painel-banco-form');
+}
+
+async function salvarQuestaoNoBanco() {
+  const mat=document.getElementById('banco-materia').value;
+  const perg=document.getElementById('banco-pergunta').value.trim();
+  if(!perg){mostrarToast('Digite a pergunta!','erro');return;}
+  const alts=LETRAS_PROF.map((_,i)=>document.getElementById('banco-alt-'+i).value.trim());
+  if(alts.some(a=>!a)){mostrarToast('Preencha todas as alternativas!','erro');return;}
+  const radio=document.querySelector('input[name="banco-correta"]:checked');
+  if(!radio){mostrarToast('Marque a alternativa correta!','erro');return;}
+  const correta=parseInt(radio.value);
+
+  if(ProfEstado.bancoEditando) {
+    const idx=(bancoDados.questions||[]).findIndex(q=>q.id===ProfEstado.bancoEditando);
+    if(idx>=0){bancoDados.questions[idx].text=perg;bancoDados.questions[idx].answers=alts;bancoDados.questions[idx].correct_index=correta;bancoDados.questions[idx].category=mat;}
+  } else {
+    const novoId=Math.max(0,...(bancoDados.questions||[]).map(q=>q.id||0))+1;
+    (bancoDados.questions=bancoDados.questions||[]).push({id:novoId,category:mat,text:perg,image_path:'',answers:alts,correct_index:correta,points:1});
+  }
+
+  // Salva via API
+  try {
+    await fetch('/api/banco', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(bancoDados)
+    });
+    mostrarToast(ProfEstado.bancoEditando?'Questão atualizada!':'Questão adicionada ao banco!');
+  } catch(e) { mostrarToast('Salvo localmente (sem conexão com servidor)','erro'); }
+
+  profIrPara('prof-painel-banco'); renderBanco(ProfEstado.bancoFiltro);
+}
+
+async function excluirDoBanco(id) {
+  if(!confirm('Excluir esta questão do banco global?')) return;
+  bancoDados.questions=(bancoDados.questions||[]).filter(q=>q.id!==id);
+  try {
+    await fetch('/api/banco',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(bancoDados)});
+  } catch(e){}
+  renderBanco(ProfEstado.bancoFiltro);
+  mostrarToast('Questão removida do banco.','erro');
+}
+
+function normalizar(str) {
+  if(!str) return '';
+  return str.toLowerCase().replace(/[áàâã]/g,'a').replace(/[éê]/g,'e').replace(/[í]/g,'i').replace(/[óôõ]/g,'o').replace(/[ú]/g,'u').replace(/[ç]/g,'c').trim();
+}
+
+// Carrega banco ao iniciar
+window.addEventListener('DOMContentLoaded', () => { carregarBancoDados(); });
 </script>
 </body>
 </html>

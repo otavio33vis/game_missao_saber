@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Missão Saber — Professor</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Nunito:wght@400;600;700;800&display=swap');
+
+:root {
+  --ouro:    #FFD700;
+  --verde:   #2D6A4F;
+  --azul:    #1A4D99;
+  --vermelho:#8B1A1A;
+  --mat:     #156FFF;
+  --port:    #2FF370;
+  --fundo:   #0a0a1a;
+  --card:    rgba(255,255,255,0.07);
+  --borda:   rgba(255,215,0,0.25);
+  --titulo:  'Luckiest Guy', cursive;
+  --corpo:   'Nunito', sans-serif;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:var(--corpo); background:var(--fundo); color:#fff; min-height:100vh; }
+
+/* ── Painéis ── */
+.painel { display:none; flex-direction:column; min-height:100vh; }
+.painel.ativo { display:flex; }
+
+/* ── Header ── */
+.header {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:16px 20px;
+  background:rgba(0,0,0,0.4);
+  border-bottom:1px solid var(--borda);
+  gap:12px; flex-wrap:wrap;
+}
+.header-titulo {
+  font-family:var(--titulo); font-size:1.2rem;
+  color:var(--ouro); letter-spacing:2px; flex:1; text-align:center;
+}
+
+/* ── Botões ── */
+.btn {
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  padding:10px 20px; border:none; border-radius:50px;
+  font-family:var(--titulo); font-size:0.9rem; letter-spacing:1px;
+  cursor:pointer; transition:transform .2s, box-shadow .2s; white-space:nowrap;
+}
+.btn:hover { transform:translateY(-2px); }
+.btn:active { transform:scale(0.97); }
+.btn-ouro    { background:linear-gradient(135deg,#FFD700,#FFA500); color:#1a0a00; box-shadow:0 4px 15px rgba(255,215,0,.4); }
+.btn-verde   { background:linear-gradient(135deg,#2D6A4F,#40916C); color:#fff; box-shadow:0 4px 15px rgba(45,106,79,.4); }
+.btn-azul    { background:linear-gradient(135deg,#1A4D99,#2563EB); color:#fff; box-shadow:0 4px 15px rgba(26,77,153,.4); }
+.btn-vermelho{ background:linear-gradient(135deg,#8B1A1A,#DC2626); color:#fff; box-shadow:0 4px 15px rgba(139,26,26,.4); }
+.btn-ghost   { background:transparent; border:2px solid rgba(255,255,255,.3); color:#fff; }
+.btn-ghost:hover { border-color:var(--ouro); color:var(--ouro); }
+.btn-sm { padding:7px 14px; font-size:0.78rem; }
+
+/* ── Input ── */
+.input-group { display:flex; flex-direction:column; gap:6px; margin-bottom:16px; }
+.input-group label { font-size:0.8rem; font-weight:700; color:var(--ouro); text-transform:uppercase; letter-spacing:1px; }
+.input-group input, .input-group textarea {
+  padding:12px 16px; border-radius:12px;
+  border:2px solid rgba(255,215,0,.2);
+  background:rgba(255,255,255,.06);
+  color:#fff; font-family:var(--corpo); font-size:0.95rem; font-weight:600;
+  outline:none; transition:border-color .2s;
+  resize:vertical;
+}
+.input-group input:focus, .input-group textarea:focus {
+  border-color:var(--ouro); box-shadow:0 0 0 3px rgba(255,215,0,.12);
+}
+.input-group input::placeholder, .input-group textarea::placeholder { color:rgba(255,255,255,.3); }
+.input-readonly {
+  background:rgba(255,215,0,.1) !important;
+  border-color:rgba(255,215,0,.5) !important;
+  color:var(--ouro) !important;
+  font-family:var(--titulo) !important; font-size:1.3rem !important;
+  text-align:center; letter-spacing:6px;
+}
+
+/* ── Card ── */
+.card {
+  background:rgba(10,10,30,.9); backdrop-filter:blur(16px);
+  border:1px solid var(--borda); border-radius:16px; padding:32px;
+}
+
+/* ── Scroll content ── */
+.conteudo { flex:1; overflow-y:auto; padding:20px; max-width:700px; width:100%; margin:0 auto; }
+
+/* ── Turma Card ── */
+.turma-card {
+  background:var(--card); border:1px solid rgba(255,255,255,.1);
+  border-radius:16px; margin-bottom:12px; overflow:hidden;
+  transition:border-color .2s;
+}
+.turma-card.expandido { border-color:var(--ouro); }
+.turma-header {
+  display:flex; align-items:center; gap:14px;
+  padding:16px 20px; cursor:pointer;
+  transition:background .2s;
+}
+.turma-header:hover { background:rgba(255,255,255,.05); }
+.turma-inicial {
+  width:44px; height:44px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-family:var(--titulo); font-size:1.2rem; flex-shrink:0;
+}
+.turma-info { flex:1; }
+.turma-nome { font-weight:800; font-size:1rem; }
+.turma-qtd  { font-size:0.8rem; color:rgba(255,255,255,.5); margin-top:2px; }
+.turma-badge {
+  background:rgba(255,215,0,.15); border:1px solid rgba(255,215,0,.4);
+  color:var(--ouro); font-family:var(--titulo); font-size:0.85rem;
+  padding:4px 10px; border-radius:20px; letter-spacing:3px;
+}
+.turma-seta {
+  color:rgba(255,255,255,.4); font-size:1.1rem;
+  transition:transform .3s; user-select:none;
+}
+.turma-card.expandido .turma-seta { transform:rotate(180deg); }
+
+/* ── Materias lista ── */
+.materias-lista {
+  display:none; flex-direction:column; gap:8px;
+  padding:0 16px 16px;
+}
+.turma-card.expandido .materias-lista { display:flex; }
+.materia-btn {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:14px 18px; border-radius:12px; border:none;
+  font-family:var(--corpo); font-weight:800; font-size:0.95rem;
+  cursor:pointer; transition:transform .2s, opacity .2s;
+  color:#fff; text-align:left;
+}
+.materia-btn:hover { transform:translateX(4px); opacity:0.9; }
+.materia-btn.mat  { background:linear-gradient(135deg,#156FFF,#4D9FFF); }
+.materia-btn.port { background:linear-gradient(135deg,#059669,#2FF370); color:#001a0a; }
+.materia-qtd {
+  background:rgba(0,0,0,.3); padding:3px 10px;
+  border-radius:20px; font-size:0.8rem;
+}
+
+/* ── Lista questões ── */
+.questao-item {
+  display:flex; align-items:center; gap:12px;
+  background:var(--card); border:1px solid rgba(255,255,255,.08);
+  border-radius:12px; padding:14px 16px; margin-bottom:10px;
+}
+.questao-num {
+  min-width:28px; height:28px; border-radius:8px;
+  background:rgba(255,215,0,.15); color:var(--ouro);
+  font-family:var(--titulo); font-size:0.85rem;
+  display:flex; align-items:center; justify-content:center; flex-shrink:0;
+}
+.questao-txt { flex:1; font-size:0.9rem; line-height:1.4; }
+.questao-acoes { display:flex; gap:6px; flex-shrink:0; }
+
+/* ── Alternativas ── */
+.alternativa-row {
+  display:flex; align-items:center; gap:10px; margin-bottom:10px;
+}
+.alt-letra {
+  width:32px; height:32px; border-radius:8px;
+  background:rgba(255,215,0,.15); color:var(--ouro);
+  font-family:var(--titulo); display:flex; align-items:center; justify-content:center;
+  flex-shrink:0; font-size:0.9rem;
+}
+.alternativa-row input[type="text"] {
+  flex:1; padding:10px 14px; border-radius:10px;
+  border:2px solid rgba(255,255,255,.15);
+  background:rgba(255,255,255,.06); color:#fff;
+  font-family:var(--corpo); font-size:0.9rem; font-weight:600; outline:none;
+  transition:border-color .2s;
+}
+.alternativa-row input[type="text"]:focus { border-color:var(--ouro); }
+.alternativa-row input[type="radio"] { width:18px; height:18px; cursor:pointer; accent-color:var(--ouro); }
+
+/* ── Empty state ── */
+.empty {
+  text-align:center; padding:48px 20px;
+  color:rgba(255,255,255,.35); font-size:0.95rem;
+}
+.empty-icon { font-size:3rem; margin-bottom:12px; }
+
+/* ── Popup ── */
+.popup-overlay {
+  display:none; position:fixed; inset:0;
+  background:rgba(0,0,0,.7); backdrop-filter:blur(6px);
+  z-index:200; align-items:center; justify-content:center;
+}
+.popup-overlay.ativo { display:flex; }
+.popup-box {
+  background:linear-gradient(135deg,#1a1a3e,#0d0d2b);
+  border:1px solid var(--borda); border-radius:20px;
+  padding:32px; max-width:420px; width:90%;
+  animation:popIn .3s ease;
+}
+@keyframes popIn { from{transform:scale(.85);opacity:0} to{transform:scale(1);opacity:1} }
+.popup-box h3 { font-family:var(--titulo); color:var(--ouro); margin-bottom:20px; font-size:1.2rem; }
+.popup-hint { font-size:0.8rem; color:rgba(255,255,255,.5); margin-bottom:20px; text-align:center; }
+.popup-btns { display:flex; gap:10px; margin-top:4px; }
+.popup-btns .btn { flex:1; }
+
+/* ── Toast ── */
+.toast {
+  position:fixed; bottom:24px; left:50%;
+  transform:translateX(-50%) translateY(80px);
+  background:rgba(255,215,0,.95); color:#1a0a00;
+  padding:12px 24px; border-radius:50px;
+  font-weight:800; font-size:0.9rem; z-index:300;
+  transition:transform .4s cubic-bezier(.34,1.56,.64,1);
+  white-space:nowrap; pointer-events:none;
+}
+.toast.show { transform:translateX(-50%) translateY(0); }
+.toast.erro { background:rgba(220,38,38,.95); color:#fff; }
+
+/* ── Login ── */
+#painel-login {
+  align-items:center; justify-content:center;
+  background:radial-gradient(ellipse at center, #1a1a3e 0%, #0a0a1a 100%);
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════════
+     PAINEL 1 — LOGIN
+══════════════════════════════════════════════════════════ -->
+<div id="painel-login" class="painel ativo">
+  <div class="card" style="max-width:380px;width:90%;margin:20px">
+    <h2 style="font-family:var(--titulo);color:var(--ouro);text-align:center;margin-bottom:24px;font-size:1.5rem">
+      👨‍🏫 PROFESSOR
+    </h2>
+    <div class="input-group">
+      <label>Usuário</label>
+      <input type="text" id="login-usuario" placeholder="admin">
+    </div>
+    <div class="input-group">
+      <label>Senha</label>
+      <input type="password" id="login-senha" placeholder="••••••"
+             onkeydown="if(event.key==='Enter') fazerLogin()">
+    </div>
+    <button class="btn btn-ouro" style="width:100%;margin-bottom:10px" onclick="fazerLogin()">ENTRAR</button>
+    <button class="btn btn-ghost" style="width:100%" onclick="voltarMenu()">← Voltar ao Menu</button>
+    <p id="login-erro" style="color:#f87171;text-align:center;margin-top:12px;font-size:0.85rem;display:none">
+      Usuário ou senha incorretos!
+    </p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     PAINEL 2 — TURMAS
+══════════════════════════════════════════════════════════ -->
+<div id="painel-turmas" class="painel">
+  <div class="header">
+    <button class="btn btn-ghost btn-sm" onclick="irPara('painel-login')">← Sair</button>
+    <span class="header-titulo">MINHAS TURMAS</span>
+    <button class="btn btn-ouro btn-sm" onclick="abrirPopupNovaTurma()">+ Nova Turma</button>
+  </div>
+  <div class="conteudo">
+    <div id="lista-turmas">
+      <div class="empty">
+        <div class="empty-icon">🏫</div>
+        Nenhuma turma cadastrada ainda.<br>Clique em "+ Nova Turma" para começar.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     PAINEL 3 — LISTA DE QUESTÕES
+══════════════════════════════════════════════════════════ -->
+<div id="painel-questoes" class="painel">
+  <div class="header">
+    <button class="btn btn-ghost btn-sm" onclick="irPara('painel-turmas')">← Voltar</button>
+    <span class="header-titulo" id="questoes-titulo">MATEMÁTICA</span>
+    <button class="btn btn-ouro btn-sm" onclick="abrirFormQuestao(null)">+ Nova Questão</button>
+  </div>
+  <div class="conteudo">
+    <div id="lista-questoes"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     PAINEL 4 — FORMULÁRIO DE QUESTÃO
+══════════════════════════════════════════════════════════ -->
+<div id="painel-form" class="painel">
+  <div class="header">
+    <button class="btn btn-ghost btn-sm" onclick="irPara('painel-questoes')">← Voltar</button>
+    <span class="header-titulo" id="form-titulo">NOVA QUESTÃO</span>
+    <div style="width:90px"></div>
+  </div>
+  <div class="conteudo">
+    <div class="input-group">
+      <label>Pergunta *</label>
+      <textarea id="form-pergunta" rows="3" placeholder="Digite a pergunta aqui..."></textarea>
+    </div>
+
+    <div style="margin-bottom:8px">
+      <label style="font-size:0.8rem;font-weight:700;color:var(--ouro);text-transform:uppercase;letter-spacing:1px">
+        Alternativas — marque a correta ✓
+      </label>
+    </div>
+
+    <div id="form-alternativas">
+      <!-- gerado via JS -->
+    </div>
+
+    <div style="display:flex;gap:10px;margin-top:20px">
+      <button class="btn btn-ghost" style="flex:1" onclick="irPara('painel-questoes')">CANCELAR</button>
+      <button class="btn btn-ouro" style="flex:1" onclick="salvarQuestao()">💾 SALVAR</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     POPUP — NOVA TURMA
+══════════════════════════════════════════════════════════ -->
+<div id="popup-turma" class="popup-overlay">
+  <div class="popup-box">
+    <h3>🏫 Nova Turma</h3>
+    <div class="input-group">
+      <label>Nome da Turma</label>
+      <input type="text" id="nova-turma-nome" placeholder="Ex: 3 Ano A" maxlength="30"
+             onkeydown="if(event.key==='Enter') criarTurma()">
+    </div>
+    <div class="input-group">
+      <label>Código da Turma</label>
+      <input type="text" id="nova-turma-codigo" class="input-readonly" readonly>
+    </div>
+    <p class="popup-hint">📢 Mostre este código para seus alunos</p>
+    <div class="popup-btns">
+      <button class="btn btn-ghost" onclick="fecharPopupTurma()">CANCELAR</button>
+      <button class="btn btn-verde" onclick="criarTurma()">✓ CRIAR TURMA</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="toast"></div>
+
+<script>
+// ── Estado ────────────────────────────────────────────────────────────────────
+const Estado = {
+  turmaSelecionada: null,  // { codigo, nome }
+  materiaSelecionada: null, // 'matematica' | 'portugues'
+  questaoEditando: null,   // id da questão ou null
+  cardExpandido: null,     // elemento DOM
+};
+
+const CORES_INICIAIS = ['#156FFF','#2D6A4F','#8B1A1A','#b5860d','#6B21A8'];
+const LETRAS = ['A','B','C','D', 'E'];
+
+// ── Navegação ─────────────────────────────────────────────────────────────────
+function irPara(id) {
+  document.querySelectorAll('.painel').forEach(p => p.classList.remove('ativo'));
+  document.getElementById(id)?.classList.add('ativo');
+}
+
+// ── Toast ─────────────────────────────────────────────────────────────────────
+let _toastTimer;
+function toast(msg, tipo='') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast' + (tipo ? ' '+tipo : '');
+  clearTimeout(_toastTimer);
+  requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('show')));
+  _toastTimer = setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+// ── Login ─────────────────────────────────────────────────────────────────────
+function fazerLogin() {
+  const u = document.getElementById('login-usuario').value.trim();
+  const s = document.getElementById('login-senha').value.trim();
+  const erro = document.getElementById('login-erro');
+  if (u === 'admin' && s === '123') {
+    erro.style.display = 'none';
+    irPara('painel-turmas');
+    renderTurmas();
+  } else {
+    erro.style.display = 'block';
+  }
+}
+
+function voltarMenu() {
+  window.location.href = '/';
+}
+
+// ── LocalStorage ──────────────────────────────────────────────────────────────
+function getTurmasLista() {
+  return JSON.parse(localStorage.getItem('turmas_lista') || '[]');
+}
+function getTurma(codigo) {
+  return JSON.parse(localStorage.getItem('turma_' + codigo) || 'null');
+}
+function salvarTurma(turma) {
+  localStorage.setItem('turma_' + turma.codigo, JSON.stringify(turma));
+}
+function salvarTurmasLista(lista) {
+  localStorage.setItem('turmas_lista', JSON.stringify(lista));
+}
+
+// ── Popup nova turma ──────────────────────────────────────────────────────────
+function gerarCodigo() {
+  let cod;
+  const existentes = getTurmasLista();
+  do { cod = String(Math.floor(1000 + Math.random() * 9000)); }
+  while (existentes.includes(cod));
+  return cod;
+}
+
+function abrirPopupNovaTurma() {
+  document.getElementById('nova-turma-nome').value = '';
+  document.getElementById('nova-turma-codigo').value = gerarCodigo();
+  document.getElementById('popup-turma').classList.add('ativo');
+  setTimeout(() => document.getElementById('nova-turma-nome').focus(), 100);
+}
+
+function fecharPopupTurma() {
+  document.getElementById('popup-turma').classList.remove('ativo');
+}
+
+function criarTurma() {
+  const nome   = document.getElementById('nova-turma-nome').value.trim();
+  const codigo = document.getElementById('nova-turma-codigo').value;
+  if (!nome) { toast('Digite o nome da turma!', 'erro'); return; }
+
+  const turma = { codigo, nome, questoes: [] };
+  salvarTurma(turma);
+  const lista = getTurmasLista();
+  lista.push(codigo);
+  salvarTurmasLista(lista);
+
+  fecharPopupTurma();
+  renderTurmas();
+  toast(`Turma "${nome}" criada! Código: ${codigo}`);
+}
+
+// ── Render turmas ─────────────────────────────────────────────────────────────
+function renderTurmas() {
+  const container = document.getElementById('lista-turmas');
+  const lista     = getTurmasLista();
+
+  if (!lista.length) {
+    container.innerHTML = `<div class="empty">
+      <div class="empty-icon">🏫</div>
+      Nenhuma turma cadastrada ainda.<br>Clique em "+ Nova Turma" para começar.
+    </div>`;
+    return;
+  }
+
+  container.innerHTML = lista.map((cod, i) => {
+    const t = getTurma(cod);
+    if (!t) return '';
+    const cor     = CORES_INICIAIS[i % CORES_INICIAIS.length];
+    const inicial = t.nome.charAt(0).toUpperCase();
+    const qtdMat  = t.questoes.filter(q => q.category === 'matematica').length;
+    const qtdPort = t.questoes.filter(q => q.category === 'portugues').length;
+    const total   = t.questoes.length;
+
+    return `
+    <div class="turma-card" id="card-${cod}">
+      <div class="turma-header" onclick="toggleCard('${cod}')">
+        <div class="turma-inicial" style="background:${cor}">${inicial}</div>
+        <div class="turma-info">
+          <div class="turma-nome">${t.nome}</div>
+          <div class="turma-qtd">${total} questão${total !== 1 ? 'ões' : ''} cadastrada${total !== 1 ? 's' : ''}</div>
+        </div>
+        <div class="turma-badge">${cod}</div>
+        <div class="turma-seta">▼</div>
+      </div>
+      <div class="materias-lista">
+        <button class="materia-btn mat" onclick="abrirQuestoes('${cod}','matematica')">
+          📐 Matemática
+          <span class="materia-qtd">${qtdMat} questão${qtdMat !== 1 ? 'ões' : ''}</span>
+        </button>
+        <button class="materia-btn port" onclick="abrirQuestoes('${cod}','portugues')">
+          📖 Português
+          <span class="materia-qtd">${qtdPort} questão${qtdPort !== 1 ? 'ões' : ''}</span>
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleCard(codigo) {
+  const card = document.getElementById('card-' + codigo);
+  if (!card) return;
+  const expandido = card.classList.contains('expandido');
+
+  // Fecha todos
+  document.querySelectorAll('.turma-card').forEach(c => c.classList.remove('expandido'));
+
+  if (!expandido) card.classList.add('expandido');
+}
+
+// ── Questões ──────────────────────────────────────────────────────────────────
+function abrirQuestoes(codigo, materia) {
+  Estado.turmaSelecionada  = getTurma(codigo);
+  Estado.materiaSelecionada = materia;
+
+  const nomes  = { matematica: 'MATEMÁTICA', portugues: 'PORTUGUÊS' };
+  const turma  = Estado.turmaSelecionada;
+  document.getElementById('questoes-titulo').textContent =
+    `${nomes[materia]} — ${turma.nome}`;
+
+  irPara('painel-questoes');
+  renderQuestoes();
+}
+
+function renderQuestoes() {
+  const container = document.getElementById('lista-questoes');
+  const turma     = Estado.turmaSelecionada;
+  const materia   = Estado.materiaSelecionada;
+  const questoes  = turma.questoes.filter(q => q.category === materia);
+
+  if (!questoes.length) {
+    container.innerHTML = `<div class="empty">
+      <div class="empty-icon">📝</div>
+      Nenhuma questão cadastrada para esta matéria.<br>Clique em "+ Nova Questão".
+    </div>`;
+    return;
+  }
+
+  container.innerHTML = questoes.map((q, i) => `
+    <div class="questao-item">
+      <div class="questao-num">${i+1}</div>
+      <div class="questao-txt">${q.text}</div>
+      <div class="questao-acoes">
+        <button class="btn btn-azul btn-sm" onclick="abrirFormQuestao('${q.id}')">✏️</button>
+        <button class="btn btn-vermelho btn-sm" onclick="excluirQuestao('${q.id}')">✕</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ── Formulário de questão ─────────────────────────────────────────────────────
+function abrirFormQuestao(idQuestao) {
+  Estado.questaoEditando = idQuestao;
+  document.getElementById('form-titulo').textContent =
+    idQuestao ? 'EDITAR QUESTÃO' : 'NOVA QUESTÃO';
+
+  let pergunta = '';
+  let alts = ['','','',''];
+  let correta = 0;
+
+  if (idQuestao) {
+    const q = Estado.turmaSelecionada.questoes.find(x => x.id === idQuestao);
+    if (q) {
+      pergunta = q.text;
+      alts     = [...q.answers];
+      correta  = q.correct_index;
+    }
+  }
+
+  document.getElementById('form-pergunta').value = pergunta;
+
+  document.getElementById('form-alternativas').innerHTML = LETRAS.map((l, i) => `
+    <div class="alternativa-row">
+      <div class="alt-letra">${l}</div>
+      <input type="text" id="alt-${i}" placeholder="Alternativa ${l}" value="${alts[i] || ''}">
+      <input type="radio" name="correta" value="${i}" ${correta === i ? 'checked' : ''} title="Marcar como correta">
+    </div>
+  `).join('');
+
+  irPara('painel-form');
+}
+
+function salvarQuestao() {
+  const pergunta = document.getElementById('form-pergunta').value.trim();
+  if (!pergunta) { toast('Digite a pergunta!', 'erro'); return; }
+
+  const alts = LETRAS.map((_,i) => document.getElementById('alt-'+i).value.trim());
+  if (alts.some(a => !a)) { toast('Preencha todas as alternativas!', 'erro'); return; }
+
+  const radioSel = document.querySelector('input[name="correta"]:checked');
+  if (!radioSel) { toast('Marque a alternativa correta!', 'erro'); return; }
+  const correta = parseInt(radioSel.value);
+
+  const turma   = Estado.turmaSelecionada;
+  const materia = Estado.materiaSelecionada;
+
+  // ← validação ANTES de salvar
+  if (!Estado.questaoEditando) {
+    const jaExistem = turma.questoes.filter(q => q.category === materia).length;
+    if (jaExistem >= 10) {
+      toast('Máximo de 10 questões por matéria!', 'erro'); return;
+    }
+  }
+
+  if (Estado.questaoEditando) {
+    const idx = turma.questoes.findIndex(q => q.id === Estado.questaoEditando);
+    if (idx >= 0) {
+      turma.questoes[idx].text          = pergunta;
+      turma.questoes[idx].answers       = alts;
+      turma.questoes[idx].correct_index = correta;
+    }
+    toast('Questão atualizada!');
+  } else {
+    turma.questoes.push({
+      id: Date.now(), category: materia,
+      text: pergunta, answers: alts, correct_index: correta
+    });
+    toast('Questão salva!');
+  }
+
+  salvarTurma(turma);
+  Estado.turmaSelecionada = turma;
+  irPara('painel-questoes');
+  renderQuestoes();
+}
+
+function excluirQuestao(id) {
+  if (!confirm('Excluir esta questão?')) return;
+  const turma = Estado.turmaSelecionada;
+  turma.questoes = turma.questoes.filter(q => q.id !== id);
+  salvarTurma(turma);
+  Estado.turmaSelecionada = turma;
+  renderQuestoes();
+  toast('Questão excluída.', 'erro');
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+document.getElementById('login-senha').addEventListener('keydown', e => {
+  if (e.key === 'Enter') fazerLogin();
+});
+</script>
+</body>
+</html>
