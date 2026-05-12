@@ -1,38 +1,21 @@
-// ── Estado global da sessão ──────────────────────────────────────────────────
-const Session = {
-  nomeAluno:   '',
-  codigoTurma: '',
-  mundoAtual:  '',
-  notas:       {},  // { matematica: 8, portugues: 6 }
-  acertos:     0,
-
-  salvarNota(mundo, nota) { this.notas[mundo] = nota; },
-  obterNota(mundo)        { return this.notas[mundo] ?? 0; },
-  totalCompletos()        { return Object.keys(this.notas).length; },
-  calcularMedia() {
-    const vals = Object.values(this.notas);
-    if (!vals.length) return 0;
-    return vals.reduce((a, b) => a + b, 0) / vals.length;
-  },
-  resetar() {
-    this.mundoAtual = '';
-    this.notas      = {};
-    this.acertos    = 0;
-  }
-};
+/**
+ * utils.js — Missão Saber
+ * Funções utilitárias compartilhadas entre todas as telas.
+ * Não depende de nenhum outro módulo.
+ */
 
 // ── Navegação entre telas ────────────────────────────────────────────────────
 function irPara(id) {
   document.querySelectorAll('.tela').forEach(t => t.classList.remove('ativa'));
   const tela = document.getElementById(id);
-  if (tela) {
-    tela.classList.add('ativa', 'fade-enter');
-    tela.addEventListener('animationend', () => tela.classList.remove('fade-enter'), { once: true });
-  }
+  if (!tela) return;
+  tela.classList.add('ativa', 'fade-enter');
+  tela.addEventListener('animationend', () => tela.classList.remove('fade-enter'), { once: true });
 }
 
-// ── Toast (mensagem temporária) ──────────────────────────────────────────────
+// ── Toast ────────────────────────────────────────────────────────────────────
 let _toastTimer;
+
 function mostrarToast(msg, tipo = '') {
   let toast = document.getElementById('toast');
   if (!toast) {
@@ -44,9 +27,7 @@ function mostrarToast(msg, tipo = '') {
   toast.textContent = msg;
   toast.className = 'toast' + (tipo ? ` ${tipo}` : '');
   clearTimeout(_toastTimer);
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => toast.classList.add('show'));
-  });
+  requestAnimationFrame(() => requestAnimationFrame(() => toast.classList.add('show')));
   _toastTimer = setTimeout(() => toast.classList.remove('show'), 3000);
 }
 
@@ -73,13 +54,19 @@ function calcularEstrelas(nota) {
   return '✗';
 }
 
-// ── Exportar sessão (usado pelo ranking/relatório) ────────────────────────────
-function exportarResultado() {
-  return {
-    nome:   Session.nomeAluno,
-    turma:  Session.codigoTurma,
-    notas:  { ...Session.notas },
-    media:  Session.calcularMedia(),
-    data:   new Date().toISOString()
-  };
+// ── Normalizar texto (remove acentos) ────────────────────────────────────────
+function normalizar(str) {
+  if (!str) return '';
+  return str.toLowerCase()
+    .replace(/[áàâã]/g, 'a').replace(/[éê]/g, 'e')
+    .replace(/[í]/g, 'i').replace(/[óôõ]/g, 'o')
+    .replace(/[ú]/g, 'u').replace(/[ç]/g, 'c')
+    .trim();
+}
+
+// ── Sanitizar input (previne XSS) ────────────────────────────────────────────
+function sanitizar(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
 }

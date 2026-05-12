@@ -60,6 +60,31 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  // GET /api/ranking/:turma
+if (rota.startsWith('/api/ranking/') && req.method === 'GET') {
+  const codigoTurma = rota.split('/api/ranking/')[1];
+  const todos = lerResultados();
+
+  // Filtra pela turma e pega só o último resultado de cada aluno
+  const porAluno = {};
+  todos
+    .filter(r => r.turma === codigoTurma)
+    .forEach(r => {
+      const media = Number(r.media ?? r.mediaGeral ?? 0);
+      if (!porAluno[r.nome] || media > porAluno[r.nome].media) {
+        porAluno[r.nome] = { nome: r.nome, media };
+      }
+    });
+
+  const ranking = Object.values(porAluno)
+    .sort((a, b) => b.media - a.media)
+    .map((aluno, i) => ({ posicao: i + 1, ...aluno }));
+
+  res.writeHead(200, { 'Content-Type': 'application/json' });
+  res.end(JSON.stringify(ranking));
+  return;
+}
+
   // Arquivos estáticos
   let filePath = path.join(PASTA_WEB, rota==='/'?'index.html':rota);
   if (!filePath.startsWith(PASTA_WEB)) { res.writeHead(403); res.end('Proibido'); return; }
