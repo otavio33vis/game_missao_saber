@@ -4,11 +4,61 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Missão Saber</title>
+  <link rel="preload" as="image" href="assets/imagens/menu.png" fetchpriority="high">
+  <link rel="preload" as="image" href="assets/imagens/mapa.png">
+  <link rel="preload" as="image" href="assets/imagens/resultado_final.png">
+  
   <link rel="stylesheet" href="css/style.css">
   <style>
     /* ── Login ── */
-    #tela-login { justify-content:flex-end; align-items:center; padding-bottom:60px; }
-    .login-btns { display:flex; flex-direction:column; align-items:center; gap:14px; width:100%; max-width:340px; }
+    #tela-login { justify-content:center; align-items:center; }
+
+    /* ── Botão MENU padrão ── */
+    .btn-menu {
+      background: rgba(0,0,0,0.75);
+      border: 2px solid var(--cor-ouro);
+      color: var(--cor-ouro);
+      padding: 10px 22px;
+      border-radius: 50px;
+      cursor: pointer;
+      font-family: var(--fonte-titulo);
+      font-size: 0.95rem;
+      letter-spacing: 1px;
+      transition: background .2s, box-shadow .2s;
+      white-space: nowrap;
+      position: relative;
+      z-index: 50;
+    }
+    .btn-menu:hover { background:rgba(237,178,26,0.15); box-shadow:0 0 12px rgba(237,178,26,0.4); }
+
+    /* ── Topo fixo — nome esquerda, menu direita ── */
+    .tela-topo {
+      position: absolute;
+      top: 16px;
+      left: 0; right: 0;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      pointer-events: none;
+    } 
+    .tela-topo > * { pointer-events: auto; }
+
+    .usuario-tag {
+      font-family: var(--fonte-titulo);
+      font-size: 0.85rem;
+      color: var(--cor-ouro);
+      background: rgba(0,0,0,0.6);
+      border: 1px solid rgba(237,178,26,0.3);
+      padding: 6px 16px;
+      border-radius: 20px;
+      letter-spacing: 1px;
+      max-width: 260px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
 
     /* ── Modal aluno ── */
     #modal-dados { display:none; position:fixed; inset:0; z-index:150; align-items:center; justify-content:center; background:rgba(0,0,0,0.6); backdrop-filter:blur(6px); }
@@ -16,72 +66,268 @@
     #modal-dados .modal-box { background:rgba(10,10,30,0.95); border:1px solid rgba(237,178,26,0.4); border-radius:20px; padding:36px 32px; width:100%; max-width:400px; box-shadow:0 0 40px rgba(237,178,26,0.2); animation:popIn 0.3s ease; }
     #modal-dados h3 { font-family:var(--fonte-titulo); color:var(--cor-ouro); font-size:1.4rem; text-align:center; margin-bottom:24px; }
 
-    /* ── Mapa ── */
-    #tela-mapa .mapa-content { display:flex; flex-direction:column; align-items:center; gap:24px; padding:40px 20px; }
-    .mapa-blocos { display:flex; gap:24px; flex-wrap:wrap; justify-content:center; }
-    .bloco-mundo { width:220px; height:220px; border-radius:24px; border:3px solid rgba(255,255,255,0.2); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; cursor:pointer; transition:transform .3s,box-shadow .3s,border-color .3s; position:relative; overflow:hidden; background-size:contain; background-position:center; }
-    .bloco-mundo::before { content:''; position:absolute; inset:0; background:rgba(0,0,0,0.45); transition:background .3s; }
-    .bloco-mundo:hover { transform:translateY(-8px) scale(1.04); box-shadow:0 16px 50px rgba(237,178,26,0.5); border-color:var(--cor-ouro); animation:pulse-bloco 1.5s ease-in-out infinite; }
-    @keyframes pulse-bloco { 0%,100%{box-shadow:0 16px 50px rgba(237,178,26,0.5)} 50%{box-shadow:0 16px 60px rgba(237,178,26,0.8)} }
-    .bloco-mundo:hover::before { background:rgba(0,0,0,0.2); }
-    .bloco-mundo.completo { border-color:var(--cor-verde); }
-    .bloco-mundo.completo::after { content:'✓'; position:absolute; top:10px; right:14px; color:var(--cor-verde); font-size:1.4rem; font-weight:900; z-index:2; }
-    .bloco-mundo>* { position:relative; z-index:1; }
-    .bloco-nome { font-family:var(--fonte-titulo); font-size:1.4rem; letter-spacing:2px; text-shadow:2px 2px 0 rgba(0,0,0,0.9); }
-    .bloco-nota { font-size:0.85rem; font-weight:700; color:var(--cor-ouro); background:rgba(0,0,0,0.7); padding:4px 12px; border-radius:20px; }
-    .bloco-icone { font-size:2.5rem; }
-    .mapa-aluno { font-size:1rem; color:rgba(255,255,255,0.8); font-weight:700; background:rgba(0,0,0,0.4); padding:8px 20px; border-radius:20px; }
+    /* ── Mapa — fundo cobre a tela, hotspots absolutos ── */
+    #tela-mapa { position:relative; justify-content:flex-end; align-items:center; }
+    #tela-mapa .mapa-content {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      padding-bottom: 32px;
+      width: 100%;
+    }
 
+    /* Hotspots posicionados sobre a imagem de fundo */
+  .mapa-hotspot {
+    position: absolute;
+    cursor: pointer;
+    border-radius: 16px;
+    border: 4px solid transparent;
+    transition: border-color .3s, box-shadow .3s, transform .2s, background .3s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    padding-bottom: 6px;
+    background: transparent;
+    z-index: 3;
+  }
+  .mapa-hotspot:hover { transform: scale(1.04); }
+  .mapa-hotspot.completo { animation: none; border-color: var(--cor-verde); box-shadow: 0 0 14px rgba(29,185,84,0.5); }
+
+  #hotspot-portugues {
+    left: 14%; top: 25%; width: 26%; height: 45%;
+    animation: pulse-port 2s ease-in-out infinite;
+  }
+  #hotspot-matematica {
+    left: 60%; top: 22%; width: 26%; height: 40%;
+    animation: pulse-mat 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse-port {
+  0%,100% {
+    background: rgba(245,168,0,0.1);
+    border-color: rgba(245,168,0,0.5);
+    box-shadow: 0 0 0 0 rgba(245,168,0,0);
+  }
+  50% {
+    background: rgba(245,168,0,0.3);
+    border-color: rgba(245,168,0,1);
+    box-shadow: 0 0 40px 12px rgba(245,168,0,0.7);
+  }
+  }
+  @keyframes pulse-mat {
+    0%,100% {
+      background: rgba(21,111,255,0.1);
+      border-color: rgba(21,111,255,0.5);
+      box-shadow: 0 0 0 0 rgba(21,111,255,0);
+    }
+    50% {
+      background: rgba(21,111,255,0.3);
+      border-color: rgba(21,111,255,1);
+      box-shadow: 0 0 40px 12px rgba(21,111,255,0.7);
+    }
+  }
+
+  #hotspot-portugues:hover {
+    background: rgba(245,168,0,0.35);
+    border-color: #F5A800;
+    box-shadow: 0 0 32px 6px rgba(245,168,0,0.7);
+    animation: none;
+  }
+  #hotspot-matematica:hover {
+    background: rgba(21,111,255,0.35);
+    border-color: #156FFF;
+    box-shadow: 0 0 32px 6px rgba(21,111,255,0.7);
+    animation: none;
+  }
     /* ── Quiz ── */
     #tela-quiz { align-items:stretch; padding:0; }
-    .quiz-layout { display:flex; flex-direction:column; min-height:100vh; width:100%; padding:20px; gap:16px; }
-    .quiz-header { display:flex; align-items:center; justify-content:space-between; gap:16px; }
+    .quiz-layout { display:flex; flex-direction:column; min-height:100vh; width:100%; padding:10px 20px 20px; gap:8px; align-items:center; justify-content:flex-start; }
+    .quiz-header { display:flex; align-items:center; justify-content:space-between; gap:16px; width:100%; }
     .quiz-mundo-tag { font-family:var(--fonte-titulo); font-size:0.9rem; letter-spacing:2px; color:var(--cor-tema-botao,var(--cor-ouro)); background:rgba(0,0,0,0.5); padding:6px 16px; border-radius:20px; }
     #quiz-contador { font-weight:800; font-size:0.9rem; color:rgba(255,255,255,0.7); }
-    #quiz-img-box { display:none; text-align:center; }
+    #quiz-img-box { display:none; text-align:center; margin-top: 12px;}
     #quiz-img { max-height:180px; max-width:100%; border-radius:12px; object-fit:contain; }
-    #quiz-pergunta { font-size:clamp(1rem,2.5vw,1.3rem); font-weight:700; line-height:1.5; background:rgba(0,0,0,0.65); padding:20px; border-radius:16px; border-left:4px solid var(--cor-tema-botao,var(--cor-ouro)); }
-    #quiz-alternativas { display:flex; flex-direction:column; gap:10px; flex:1; }
-    .btn-alternativa { display:flex; align-items:center; gap:14px; padding:14px 18px; border-radius:14px; border:2px solid rgba(255,255,255,0.15); background:var(--cor-tema-botao,rgba(255,255,255,0.08)); color:var(--cor-tema-texto,#fff); font-family:var(--fonte-corpo); font-size:0.95rem; font-weight:700; cursor:pointer; text-align:left; transition:transform .2s,border-color .2s,background .2s; }
+    #quiz-alternativas { display:flex; flex-direction:column; gap:30px; width:100%; align-items:center; margin-top:20px; flex:0; }
+    .btn-alternativa { display:grid; grid-template-columns:32px 1fr 32px; align-items:center; gap:10px; width:72%; max-width:1250px; min-height:90px; height:auto; margin:0 auto; padding:14px 22px; border-radius:14px; border:2px solid rgba(255,255,255,0.12); background:var(--cor-tema-botao,rgba(255,255,255,0.08)); color:var(--cor-tema-texto,#fff); font-family:var(--fonte-corpo); font-size:1.08rem; font-weight:700; cursor:pointer; text-align:center; white-space:normal; transition:transform .2s,border-color .2s,background .2s; }
     .btn-alternativa:hover:not(:disabled) { transform:translateX(4px); border-color:rgba(255,255,255,0.4); }
     .btn-alternativa:disabled { cursor:default; }
     .btn-alternativa.correta { background:var(--cor-verde)!important; border-color:var(--cor-verde)!important; color:#fff!important; transform:translateX(4px); }
     .btn-alternativa.errada  { background:var(--cor-vermelho)!important; border-color:var(--cor-vermelho)!important; color:#fff!important; }
-    .badge-letra { min-width:32px; height:32px; background:var(--cor-tema-badge,#000); color:var(--cor-tema-texto,#fff); border-radius:8px; display:flex; align-items:center; justify-content:center; font-family:var(--fonte-titulo); font-size:0.9rem; flex-shrink:0; }
-    .btn-menu-quiz { background:rgba(0,0,0,0.5); border:2px solid rgba(255,255,255,0.2); color:#fff; padding:8px 16px; border-radius:20px; cursor:pointer; font-family:var(--fonte-titulo); font-size:0.85rem; transition:border-color .2s; width:auto; }
-    .btn-menu-quiz:hover { border-color:var(--cor-ouro); color:var(--cor-ouro); }
+    .badge-letra {min-width: 38px; height: 38px; background: var(--cor-tema-badge, #000); color: var(--cor-tema-texto, #fff); border-radius: 10px; display: flex; align-items: center;justify-content: center;font-family: var(--fonte-titulo); font-size: 1.05rem; font-weight: 700; flex-shrink: 0; justify-self: start; border: 2px solid rgba(0,0,0,0.15); letter-spacing: 0.5px;}
 
     /* ── Resultado Mundo ── */
-    #tela-resultado-mundo .res-content { text-align:center; display:flex; flex-direction:column; align-items:center; gap:16px; padding:40px 20px; }
+    #tela-resultado-mundo .res-content { text-align:center; display:flex; flex-direction:column; align-items:center; gap:16px; padding:80px 20px 40px; }
     #res-mundo-nota { font-family:var(--fonte-titulo); font-size:5rem; color:var(--cor-ouro); text-shadow:4px 4px 0 rgba(0,0,0,0.5),0 0 40px rgba(237,178,26,0.5); line-height:1; }
     .res-label { font-size:0.8rem; font-weight:700; color:rgba(255,255,255,0.5); text-transform:uppercase; letter-spacing:2px; }
 
-    /* ── Ranking ── */
-    .ranking-box { width:100%; max-width:380px; background:rgba(0,0,0,0.5); border:1px solid rgba(237,178,26,0.3); border-radius:16px; padding:16px 20px; }
-    .ranking-titulo { font-family:var(--fonte-titulo); font-size:1rem; color:var(--cor-ouro); letter-spacing:2px; text-align:center; margin-bottom:12px; }
-    .ranking-lista { display:flex; flex-direction:column; gap:8px; }
-    .ranking-item { display:flex; align-items:center; gap:12px; background:rgba(255,255,255,0.05); border-radius:10px; padding:8px 14px; border:1px solid transparent; transition:border-color .2s; }
+    /* ── Painel resultado final ── */
+    .painel-resultado {
+      width: 100%;
+      max-width: 520px;
+      background: linear-gradient(180deg, #0d1b5e 0%, #1a2a6e 60%, #0d1b5e 100%);
+      border-radius: 24px;
+      padding: 4px;
+      box-shadow:
+        0 0 0 3px #c9a227,
+        0 0 0 5px #f0c040,
+        0 0 0 7px #a07010,
+        0 8px 40px rgba(0,0,0,0.7);
+      position: relative;
+      z-index: 5;
+    }
+    .painel-resultado-inner {
+      background: linear-gradient(180deg, #0d1f7a 0%, #1a3090 50%, #0d1f7a 100%);
+      border-radius: 20px;
+      padding: 32px 40px;
+      border: 1px solid rgba(255,215,0,0.25);
+    }
+    .painel-media-label {
+      font-family: var(--fonte-titulo);
+      font-size: 1.3rem;
+      color: rgba(255,215,0,0.85);
+      letter-spacing: 3px;
+      text-align: center;
+      margin-bottom: 6px;
+    }
+    .painel-media-valor {
+      font-family: var(--fonte-titulo);
+      font-size: 5rem;
+      color: var(--cor-ouro);
+      text-shadow: 3px 3px 0 rgba(0,0,0,0.5), 0 0 30px rgba(237,178,26,0.4);
+      text-align: center;
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+    .painel-status {
+      font-family: var(--fonte-titulo);
+      font-size: 1.3rem;
+      letter-spacing: 2px;
+      text-align: center;
+      margin-bottom: 4px;
+    }
+    .painel-divisor {
+      border: none;
+      border-top: 1px solid rgba(255,215,0,0.25);
+      margin: 16px 0;
+    }
+    .painel-ranking-titulo {
+      font-family: var(--fonte-titulo);
+      font-size: 1.2rem;
+      color: var(--cor-ouro);
+      letter-spacing: 3px;
+      text-align: center;
+      margin-bottom: 14px;
+    }
+    .ranking-lista { display:flex; flex-direction:column; gap:10px; }
+    .ranking-item {display:flex; align-items:center; gap:14px;background:rgba(255,255,255,0.06);border-radius:12px; padding:12px 18px;border:1px solid transparent; transition:border-color .2s;}
     .ranking-item.destaque { border-color:var(--cor-ouro); background:rgba(237,178,26,0.12); }
-    .ranking-pos { font-size:1.4rem; min-width:28px; text-align:center; }
-    .ranking-nome { flex:1; font-weight:700; font-size:0.9rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    .ranking-media { font-family:var(--fonte-titulo); font-size:1rem; color:var(--cor-ouro); }
+    .ranking-pos { font-size:1.8rem; min-width:36px; text-align:center; }
+    .ranking-nome { flex:1; font-weight:700; font-size:1.05rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .ranking-media { font-family:var(--fonte-titulo); font-size:1.2rem; color:var(--cor-ouro); }
     .ranking-item.destaque .ranking-media { color:#fff; }
-    .ranking-vazio { text-align:center; font-size:0.85rem; color:rgba(255,255,255,0.4); padding:8px 0; }
 
-    /* ── Resultado Final ── */
-    #tela-resultado-final .res-final-content { text-align:center; display:flex; flex-direction:column; align-items:center; gap:20px; padding:40px 20px; max-width:560px; }
-    #res-final-media { font-family:var(--fonte-titulo); font-size:4rem; color:var(--cor-ouro); text-shadow:3px 3px 0 rgba(0,0,0,0.5); }
-    #res-final-status { font-family:var(--fonte-titulo); font-size:1.8rem; letter-spacing:2px; }
-    .detalhes-materia { display:flex; flex-direction:column; gap:10px; width:100%; }
-    .detalhe-item { display:flex; align-items:center; justify-content:space-between; background:rgba(255,255,255,0.06); border-radius:12px; padding:12px 20px; border-left:4px solid var(--cor-ouro); }
-    .detalhe-item.mat { border-color:var(--cor-mat); }
-    .detalhe-item.port { border-color:var(--cor-port); }
-    .detalhe-nome { font-weight:800; font-size:1rem; }
-    .detalhe-nota { font-family:var(--fonte-titulo); font-size:1.3rem; color:var(--cor-ouro); }
-    .res-final-btns { display:flex; flex-direction:column; gap:12px; width:100%; max-width:320px; }
+    /* ── Resultado Final tela ── */
+    #tela-resultado-final { justify-content:center; align-items:center; }
+    .res-final-content {
+      position: relative;
+      z-index: 5;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      max-width: 560px;
+      padding: 0 20px;
+      margin-top: 80px;
+    }
+
+    @keyframes popIn { from{transform:scale(0.85);opacity:0} to{transform:scale(1);opacity:1} }
+
+    /* ── Loading inicial ── */
+    #loading-inicial {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: #0a0a1a;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 28px;
+    }
+    #loading-titulo {
+      font-family: 'Luckiest Guy', cursive;
+      color: #EDB21A;
+      font-size: 2.2rem;
+      letter-spacing: 6px;
+      text-shadow: 3px 3px 0 rgba(0,0,0,0.5), 0 0 30px rgba(237,178,26,0.4);
+    }
+    #loading-barra-wrap {
+      width: 320px;
+      height: 10px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 5px;
+      overflow: hidden;
+      border: 1px solid rgba(237,178,26,0.2);
+    }
+    #loading-barra {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #EDB21A, #F5D020);
+      border-radius: 5px;
+      transition: width 0.3s ease;
+    }
+    #loading-msg {
+      font-family: 'Nunito', sans-serif;
+      color: rgba(255,255,255,0.55);
+      font-size: 0.95rem;
+      letter-spacing: 0.5px;
+      min-height: 24px;
+      transition: opacity 0.3s ease;
+      text-align: center;
+    }
+    #loading-dica {
+      font-family: 'Nunito', sans-serif;
+      color: rgba(255,255,255,0.25);
+      font-size: 0.75rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-top: -10px;
+    }
   </style>
 </head>
 <body>
+
+<!-- LOADING INICIAL -->
+<div id="loading-inicial">
+  <div id="loading-titulo">MISSÃO SABER</div>
+  <div id="loading-barra-wrap">
+    <div id="loading-barra"></div>
+  </div>
+  <div id="loading-msg">Afiando os lápis... ✏️</div>
+  <div id="loading-dica">Dica: leia as questões com calma!</div>
+</div>
+
+<!-- BOTÃO FULLSCREEN -->
+<button id="btn-fullscreen"
+        onclick="toggleFullscreen()"
+        style="position:fixed;bottom:16px;right:16px;z-index:999;
+               background:rgba(0,0,0,0.6);border:2px solid rgba(255,255,255,0.3);
+               border-radius:50%;width:44px;height:44px;cursor:pointer;
+               display:flex;align-items:center;justify-content:center;
+               transition:opacity .2s"
+        title="Tela cheia">
+  <svg id="fs-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
+       stroke="white" stroke-width="2.5" stroke-linecap="round">
+    <polyline points="15 3 21 3 21 9"/>
+    <polyline points="9 21 3 21 3 15"/>
+    <line x1="21" y1="3" x2="14" y2="10"/>
+    <line x1="3" y1="21" x2="10" y2="14"/>
+  </svg>
+</button>
 
 <!-- POPUP GLOBAL -->
 <div id="popup-overlay" class="popup-overlay">
@@ -99,8 +345,12 @@
   <div class="modal-box">
     <h3>🎓 Quem é você?</h3>
     <div class="input-group">
-      <label>Seu Nome *</label>
-      <input type="text" id="input-nome" placeholder="Digite seu nome completo" maxlength="50">
+      <label>Nome *</label>
+      <input type="text" id="input-nome" placeholder="Seu nome" maxlength="50">
+    </div>
+    <div class="input-group">
+      <label>Sobrenome</label>
+      <input type="text" id="input-sobrenome" placeholder="Seu sobrenome" maxlength="50">
     </div>
     <div class="input-group">
       <label>Código da Turma (opcional)</label>
@@ -113,42 +363,39 @@
 
 <!-- TELA 1 — LOGIN -->
 <section id="tela-login" class="tela ativa">
-  <div class="fundo-img" style="background-image:url('assets/imagens/menu.png');background-size:cover;background-position:center"></div>
-  <div class="login-btns fade-enter" style="position:absolute;bottom:30%;left:50%;transform:translateX(-50%);z-index:2;width:auto">
+  <div class="fundo-img" style="background-color:#0a0a1a;background-image:url('assets/imagens/menu.png')"></div>
+
+  <button onclick="window.location.href='professor.html'"
+          style="position:fixed;top:20px;right:20px;background:rgba(0,0,0,0.7);border:2px solid var(--cor-ouro);border-radius:50%;width:64px;height:64px;font-size:1.8rem;cursor:pointer;transition:box-shadow .2s;z-index:50"
+          onmouseover="this.style.boxShadow='0 0 16px rgba(237,178,26,0.6)'"
+          onmouseout="this.style.boxShadow='none'"
+          title="Modo Professor">👩‍🏫</button>
+
+  <div id="btns-menu" style="position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:14px">
     <button class="btn btn-ouro" style="font-size:1.3rem;padding:18px 48px"
             onclick="Aluno.abrirModal()">▶ JOGAR</button>
-    <button class="btn btn-ghost"
-            onclick="window.location.href='professor.html'">👨‍🏫 Modo Professor</button>
   </div>
 </section>
 
 <!-- TELA 2 — MAPA -->
 <section id="tela-mapa" class="tela">
-  <div class="fundo-img" style="background-image:url('assets/imagens/menu.png')"></div>
+  <div class="fundo-img" style="background-image:url('assets/imagens/mapa.png');background-size:cover;background-position:center"></div>
+
+  <div class="tela-topo">
+    <span class="usuario-tag" id="mapa-usuario-tag"></span>
+    <button class="btn-menu" onclick="Aluno.confirmarSairMenu()">☰ MENU</button>
+  </div>
+
+  <div class="mapa-hotspot" id="hotspot-matematica" onclick="Mapa.iniciarMundo('matematica')">
+    <span class="hotspot-nota" id="nota-matematica"></span>
+  </div>
+  <div class="mapa-hotspot" id="hotspot-portugues" onclick="Mapa.iniciarMundo('portugues')">
+    <span class="hotspot-nota" id="nota-portugues"></span>
+  </div>
+
   <div class="mapa-content">
-    <p class="mapa-aluno" id="mapa-aluno-nome"></p>
-    <div class="mapa-blocos">
-      <div class="bloco-mundo" id="bloco-matematica"
-           style="background-image:url('assets/imagens/quiz_matematica.png')"
-           onclick="Mapa.iniciarMundo('matematica')">
-        <div class="bloco-icone">📐</div>
-        <div class="bloco-nome">MATEMÁTICA</div>
-        <div class="bloco-nota" id="nota-matematica" style="display:none"></div>
-      </div>
-      <div class="bloco-mundo" id="bloco-portugues"
-           style="background-image:url('assets/imagens/quiz_historia.png')"
-           onclick="Mapa.iniciarMundo('portugues')">
-        <div class="bloco-icone">📖</div>
-        <div class="bloco-nome">PORTUGUÊS</div>
-        <div class="bloco-nota" id="nota-portugues" style="display:none"></div>
-      </div>
-    </div>
-    <div style="display:flex;gap:12px;margin-top:8px;flex-wrap:wrap;justify-content:center">
-      <button class="btn btn-ouro" style="width:auto;padding:12px 28px"
-              onclick="ResultadoFinal.exibir()">🏆 Resultado Final</button>
-      <button class="btn btn-ghost" style="width:auto;padding:12px 28px"
-              onclick="Aluno.confirmarSairMenu()">← Menu</button>
-    </div>
+    <button class="btn btn-ouro" style="width:auto;padding:12px 28px;position:relative;z-index:5"
+            onclick="ResultadoFinal.exibir()">🏆 Resultado Final</button>
   </div>
 </section>
 
@@ -162,27 +409,40 @@
         <div class="progress-fill" id="quiz-progress" style="width:0%"></div>
       </div>
       <span id="quiz-contador">1 / 10</span>
-      <button class="btn btn-menu-quiz" onclick="Aluno.confirmarSairQuiz()">☰ MENU</button>
+      <button class="btn-menu" onclick="Aluno.confirmarSairQuiz()">☰ MENU</button>
     </div>
-    <div id="quiz-img-box"><img id="quiz-img" src="" alt="Imagem da questão"></div>
-    <div id="quiz-pergunta"></div>
-    <div id="quiz-alternativas"></div>
+    <div id="quiz-pergunta-wrap" style="width:78%;max-width:1220px;margin:4px auto;background:rgba(0,0,0,0.65);padding:14px 28px;border-radius:16px;border-left:4px solid var(--cor-tema-botao,var(--cor-ouro));text-align:center;">
+      <div id="quiz-pergunta"></div>
+      <div id="quiz-img-box" style="display:none;margin-top:10px;">
+        <img id="quiz-img" src="" alt="Imagem da questão" style="max-height:160px;max-width:100%;border-radius:12px;object-fit:contain;">
+      </div>
+    </div>
+    <div id="quiz-alternativas" style="display:flex;flex-direction:column;gap:12px;width:100%;align-items:center;margin-top:8px;flex:0;"></div>
   </div>
 </section>
 
 <!-- TELA 4 — RESULTADO MUNDO -->
 <section id="tela-resultado-mundo" class="tela">
   <div class="fundo-img" id="res-mundo-fundo"></div>
+
+  <div class="tela-topo">
+    <span></span>
+    <button class="btn-menu" onclick="Aluno.confirmarSairMenu()">☰ MENU</button>
+  </div>
+
   <div class="res-content">
     <h2 id="res-mundo-nome">MATEMÁTICA</h2>
-    <div class="res-label">NOTA</div>
-    <div id="res-mundo-nota">0</div>
-    <div class="estrelas" id="res-mundo-estrelas">★</div>
-    <p id="res-mundo-msg" style="font-size:1.2rem;font-weight:700"></p>
-    <div style="display:flex;flex-direction:column;gap:12px;width:100%;max-width:320px;margin-top:8px">
-      <button class="btn btn-ouro" onclick="Mapa.voltar()">🌍 Próximo Mundo</button>
-      <button class="btn btn-ghost" onclick="ResultadoFinal.exibir()">🏆 Resultado Final</button>
-      <button class="btn btn-ghost" onclick="Aluno.confirmarSairMenu()">← Menu</button>
+    <p id="res-mundo-msg"
+      style="font-family:var(--fonte-titulo);
+              font-size:clamp(1.2rem,2.5vw,1.8rem);
+              line-height:1.4;
+              text-align:center;
+              max-width:700px;
+              margin-top:16px"></p>
+    <div style="display:flex;flex-direction:column;gap:12px;width:100%;max-width:320px;margin-top:24px">
+      <button id="btn-proximo-mundo" class="btn btn-ouro" onclick="Mapa.voltar()" style="display:none">
+        🗺️ Continuar
+      </button>
     </div>
   </div>
 </section>
@@ -190,50 +450,143 @@
 <!-- TELA 5 — RESULTADO FINAL -->
 <section id="tela-resultado-final" class="tela">
   <div class="fundo-img" style="background-image:url('assets/imagens/resultado_final.png')"></div>
-  <div class="res-final-content card">
-    <h1>RESULTADO FINAL</h1>
-    <div class="res-label">MÉDIA GERAL</div>
-    <div id="res-final-media">0,0</div>
-    <div id="res-final-status" style="color:var(--cor-verde)">APROVADO!</div>
-    <div class="detalhes-materia" id="res-final-detalhes"></div>
-    <div class="ranking-box" id="ranking-turma" style="display:none">
-    <div class="ranking-titulo">🏆 TOP DA TURMA</div>
-    <div class="ranking-lista" id="ranking-lista"></div>
-    </div>
-    <div class="res-final-btns">
-      <button class="btn btn-ouro" onclick="Aluno.jogarNovamente()">🔄 Jogar Novamente</button>
-      <button class="btn btn-ghost" onclick="Aluno.sairParaMenu()">← Menu Principal</button>
+
+  <div class="tela-topo">
+    <span></span>
+    <button class="btn-menu" onclick="Aluno.sairParaMenu()">☰ MENU</button>
+  </div>
+
+  <div class="res-final-content">
+    <div class="painel-resultado">
+      <div class="painel-resultado-inner">
+        <div id="res-final-nome" style="font-family:var(--fonte-titulo);font-size:1.5rem;font-weight:800;color:#FFFFFF;text-align:center;margin-bottom:6px;letter-spacing:1px;text-shadow:2px 2px 0 rgba(0,0,0,0.5);"></div>
+        <div class="painel-media-label">MÉDIA FINAL</div>
+        <div class="painel-media-valor" id="res-final-media">0,0</div>
+        <div class="painel-status" id="res-final-status">APROVADO! 🎉</div>
+        <div id="ranking-turma" style="display:none">
+          <hr class="painel-divisor">
+          <div class="painel-ranking-titulo">🏆 RANKING</div>
+          <div class="ranking-lista" id="ranking-lista"></div>
+        </div>
+      </div>
     </div>
   </div>
 </section>
 
-<!-- Scripts — ordem importa! -->
 <script src="js/utils.js"></script>
 <script src="js/session.js"></script>
 <script src="js/quiz.js"></script>
 <script src="js/mapa.js"></script>
 <script>
-  // Inicializa eventos de teclado e carrega banco ao abrir
-  window.addEventListener('DOMContentLoaded', async () => {
-    Aluno.init();
-    await Quiz.carregarBanco();
-  });
-  // ── Ranking ──
+
+function toggleFullscreen() {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen();
+  } else {
+    document.exitFullscreen();
+  }
+}
+
+document.addEventListener('fullscreenchange', () => {
+  const icon = document.getElementById('fs-icon');
+  if (!icon) return;
+  if (document.fullscreenElement) {
+    icon.innerHTML = `
+      <polyline points="4 14 10 14 10 20"/>
+      <polyline points="20 10 14 10 14 4"/>
+      <line x1="10" y1="14" x2="3" y2="21"/>
+      <line x1="21" y1="3" x2="14" y2="10"/>`;
+  } else {
+    icon.innerHTML = `
+      <polyline points="15 3 21 3 21 9"/>
+      <polyline points="9 21 3 21 3 15"/>
+      <line x1="21" y1="3" x2="14" y2="10"/>
+      <line x1="3" y1="21" x2="10" y2="14"/>`;
+  }
+});
+
+window.addEventListener('DOMContentLoaded', async () => {
+  const barra   = document.getElementById('loading-barra');
+  const loading = document.getElementById('loading-inicial');
+  const msgEl   = document.getElementById('loading-msg');
+
+  const mensagens = [
+    'Afiando os lápis... ✏️',
+    'Acordando o professor... 😴',
+    'Procurando as questões perdidas... 🔍',
+    'Espantando as borboletas da barriga... 🦋',
+    'Organizando o mapa da missão... 🗺️',
+    'Convencendo a raposa a soltar as uvas... 🦊',
+    'Quase lá, respira fundo... 😤',
+    'Sua missão está quase pronta! 🚀'
+  ];
+
+  let progresso = 0;
+  let msgIdx    = 0;
+
+  // Troca mensagem a cada 1200ms com fade
+  const trocaMensagem = setInterval(() => {
+    if (!msgEl) return;
+    msgEl.style.opacity = '0';
+    setTimeout(() => {
+      msgIdx = (msgIdx + 1) % mensagens.length;
+      msgEl.textContent  = mensagens[msgIdx];
+      msgEl.style.opacity = '1';
+    }, 300);
+  }, 1200);
+
+  // Avança barra simulando progresso
+  const intervalo = setInterval(() => {
+    progresso = Math.min(progresso + Math.random() * 12, 85);
+    if (barra) barra.style.width = progresso + '%';
+  }, 200);
+
+  // Carrega imagem e banco em paralelo
+  await Promise.all([
+    new Promise(resolve => {
+      const img = new Image();
+      img.onload = img.onerror = resolve;
+      img.src = 'assets/imagens/menu.png';
+    }),
+    Quiz.carregarBanco()
+  ]);
+
+  // Completa barra e mostra mensagem final
+  clearInterval(intervalo);
+  clearInterval(trocaMensagem);
+  if (barra) barra.style.width = '100%';
+  if (msgEl) {
+    msgEl.style.opacity = '0';
+    setTimeout(() => {
+      msgEl.textContent   = 'Pronto! Boa sorte na missão! 🎉';
+      msgEl.style.opacity = '1';
+    }, 300);
+  }
+
+  await new Promise(r => setTimeout(r, 700));
+
+  // Fade out do loading
+  if (loading) {
+    loading.style.transition = 'opacity 0.5s ease';
+    loading.style.opacity    = '0';
+    await new Promise(r => setTimeout(r, 500));
+    loading.remove();
+  }
+
+  Aluno.init();
+});
+
 const Ranking = {
   medalhas: ['🥇','🥈','🥉'],
-
   async carregar(codigoTurma, nomeAluno) {
-    const box  = document.getElementById('ranking-turma');
+    const box   = document.getElementById('ranking-turma');
     const lista = document.getElementById('ranking-lista');
     if (!codigoTurma) { box.style.display = 'none'; return; }
-
     try {
-      const resp = await fetch(`/api/ranking/${encodeURIComponent(codigoTurma)}`);
+      const resp  = await fetch(`/api/ranking/${encodeURIComponent(codigoTurma)}`);
       const dados = await resp.json();
-      const top3 = dados.slice(0, 3);
-
+      const top3  = dados.slice(0, 3);
       if (!top3.length) { box.style.display = 'none'; return; }
-
       lista.innerHTML = top3.map(a => {
         const ehEu = a.nome.trim().toLowerCase() === nomeAluno.trim().toLowerCase();
         return `
@@ -243,7 +596,14 @@ const Ranking = {
             <span class="ranking-media">${Number(a.media).toFixed(1).replace('.',',')}</span>
           </div>`;
       }).join('');
-
+      const estaNoPodio = top3.some(a =>
+        a.nome.trim().toLowerCase() === nomeAluno.trim().toLowerCase()
+      );
+      const statusEl = document.getElementById('res-final-status');
+      if (statusEl && statusEl.textContent !== 'APROVADO! 🎉') {
+        statusEl.textContent = estaNoPodio ? '' : 'Continue tentando! 💪';
+        statusEl.style.color = '#FF9800';
+      }
       box.style.display = 'block';
     } catch (e) {
       console.warn('Ranking indisponível:', e);

@@ -5,10 +5,24 @@
  */
 
 // ── Navegação entre telas ────────────────────────────────────────────────────
-function irPara(id) {
-  document.querySelectorAll('.tela').forEach(t => t.classList.remove('ativa'));
+async function irPara(id) {
   const tela = document.getElementById(id);
   if (!tela) return;
+
+  const fundoEl = tela.querySelector('.fundo-img');
+  if (fundoEl) {
+    const bg = getComputedStyle(fundoEl).backgroundImage;
+    const match = bg.match(/url\(["']?([^"')]+)["']?\)/);
+    if (match) {
+      await new Promise(resolve => {
+        const img = new Image();
+        img.onload = img.onerror = resolve;
+        img.src = match[1];
+      });
+    }
+  }
+
+  document.querySelectorAll('.tela').forEach(t => t.classList.remove('ativa'));
   tela.classList.add('ativa', 'fade-enter');
   tela.addEventListener('animationend', () => tela.classList.remove('fade-enter'), { once: true });
 }
@@ -70,3 +84,60 @@ function sanitizar(str) {
   div.textContent = str;
   return div.innerHTML;
 }
+
+// ── Sons do quiz ─────────────────────────────────────────────────────────────
+const Som = {
+  _ctx: null,
+  _init() {
+    if (!this._ctx) this._ctx = new (window.AudioContext || window.webkitAudioContext)();
+    return this._ctx;
+  },
+
+  acerto() {
+    const ctx = this._init();
+    const notas = [523, 659, 784]; // C5, E5, G5 — acorde maior
+    notas.forEach((freq, i) => {
+      const osc  = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.frequency.value = freq;
+      osc.type = 'sine';
+      const t = ctx.currentTime + i * 0.1;
+      gain.gain.setValueAtTime(0.3, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.4);
+      osc.start(t);
+      osc.stop(t + 0.4);
+    });
+  },
+
+  erro() {
+  const ctx = this._init();
+  const osc  = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.type = 'sawtooth';
+  osc.frequency.setValueAtTime(330, ctx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(220, ctx.currentTime + 0.3);
+  gain.gain.setValueAtTime(0.3, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+  osc.start(ctx.currentTime);
+  osc.stop(ctx.currentTime + 0.3);
+},
+
+selecionar() {
+  const ctx = this._init();
+  const osc  = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.type = 'triangle';
+  osc.frequency.setValueAtTime(440, ctx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(220, ctx.currentTime + 0.15);
+  gain.gain.setValueAtTime(0.4, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
+  osc.start(ctx.currentTime);
+  osc.stop(ctx.currentTime + 0.15);
+}
+};

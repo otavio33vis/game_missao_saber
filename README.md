@@ -1,116 +1,162 @@
-# Missão Saber — Web
+# 🎮 Missão Saber
 
-Quiz educativo para Escola Municipal. HTML/CSS/JS + Node.js backend.
+Quiz educativo gamificado desenvolvido para alunos do Ensino Fundamental da rede pública de Cascavel — PR.
+
+O jogo apresenta questões de **Matemática** e **Português** em uma interface com mapa de mundos, sistema de pontuação e ranking por turma — tudo acessível pelo navegador, sem instalação.
 
 ---
 
-## Estrutura de Pastas
+## ✨ Funcionalidades
+
+- 🗺️ Mapa de mundos com dois blocos: Matemática e Português
+- ❓ 10 questões por matéria, embaralhadas a cada sessão
+- 🖼️ Suporte a imagens nas questões e nas alternativas
+- 🏆 Ranking por turma em tempo real
+- 📊 Painel do professor com resultados, filtros e exportação CSV
+- 👩‍🏫 Gerenciamento de turmas e questões por professor
+- 🔐 Autenticação com senha criptografada (bcrypt)
+- 📱 Layout responsivo (desktop e mobile)
+
+---
+
+## 🛠️ Stack
+
+| Camada | Tecnologia |
+|---|---|
+| Frontend | HTML, CSS, JavaScript puro |
+| Backend | Node.js (http nativo) |
+| Banco de dados | PostgreSQL 15 |
+| Infra | Docker, Nginx, PM2 |
+| Servidor | Hetzner CPX22 — Ubuntu 22.04 |
+
+---
+
+## 📁 Estrutura do Projeto
 
 ```
-missao-saber-web/
-  ├── index.html              ← arquivo principal (todas as telas)
-  ├── css/
-  │     └── style.css         ← estilos globais
-  ├── js/
-  │     ├── game.js           ← lógica de sessão e navegação
-  │     ├── quiz.js           ← motor do quiz
-  │     └── professor.js      ← painel do professor
-  ├── api/
-  │     └── server.js         ← backend Node.js (porta 3000)
-  ├── data/
-  │     ├── question_bank.json ← banco de questões
-  │     └── resultados.json    ← resultados dos alunos (gerado automaticamente)
-  └── assets/
-        └── imagens/           ← COLOQUE AS IMAGENS AQUI
+missao-saber-html/
+├── index.html              ← telas do aluno
+├── professor.html          ← painel do professor
+├── css/
+│   └── style.css
+├── js/
+│   ├── utils.js            ← funções compartilhadas
+│   ├── session.js          ← estado da sessão do aluno
+│   ├── quiz.js             ← motor do quiz
+│   ├── mapa.js             ← navegação entre mundos
+│   ├── turmas.js           ← gerenciamento de turmas
+│   └── professor.js        ← painel e relatórios
+├── api/
+│   ├── server.js           ← backend Node.js
+│   ├── package.json
+│   └── .env.example        ← modelo de variáveis de ambiente
+├── data/
+│   └── question_bank.json  ← banco de questões padrão
+├── assets/
+│   └── imagens/            ← imagens do jogo
+└── README.md
 ```
 
 ---
 
-## Imagens Necessárias
+## 🚀 Como Executar Localmente
 
-Coloque em `assets/imagens/` com exatamente esses nomes:
-
-| Arquivo                    | Onde aparece              |
-|----------------------------|---------------------------|
-| `menu.png`                 | Tela de login/menu        |
-| `mapa.png`                 | Tela do mapa              |
-| `quiz_matematica.png`      | Fundo do bloco Matemática |
-| `quiz_portugues.png`       | Fundo do bloco Português  |
-| `resultado_matematica.png` | Tela resultado Matemática |
-| `resultado_portugues.png`  | Tela resultado Português  |
-| `resultado_final.png`      | Tela resultado final      |
-| `fundo_login.png`          | Tela login professor      |
-
----
-
-## Como Executar Localmente
-
-### Requisitos
-- Node.js instalado (https://nodejs.org)
+### Pré-requisitos
+- Node.js 16+
+- PostgreSQL 15
 
 ### Passos
+
 ```bash
-# 1. Entra na pasta do projeto
-cd missao-saber-web
+# 1. Clone o repositório
+git clone https://github.com/otavio33vis/game_missaosaber.git
+cd game_missaosaber
 
-# 2. Inicia o servidor
-node api/server.js
+# 2. Instale as dependências
+cd api
+npm install
 
-# 3. Acessa no navegador
+# 3. Configure o ambiente
+cp .env.example .env
+# Edite o .env com sua string de conexão PostgreSQL
+
+# 4. Inicie o servidor
+npm start
+
+# 5. Acesse no navegador
 http://localhost:3000
 ```
 
-Pronto! O jogo abre no navegador.
-
 ---
 
-## Como Editar no VSCode
+## ⚙️ Variáveis de Ambiente
 
-1. Abre a pasta `missao-saber-web` no VSCode
-2. Edita os arquivos normalmente
-3. Salva e recarrega o navegador (F5)
-4. Para editar questões: edita `data/question_bank.json`
+Crie um arquivo `.env` dentro da pasta `api/` com base no `.env.example`:
 
----
-
-## Credenciais Padrão
-
-| Tipo      | Usuário | Senha |
-|-----------|---------|-------|
-| Professor | admin   | 123   |
-
----
-
-## Deploy no Servidor (Hetzner)
-
-```bash
-# Copia os arquivos para o servidor
-scp -i ~/.ssh/hetzner_key -r ./* root@178.104.144.144:/opt/missao-saber-web/
-
-# No servidor, instala dependências (apenas primeira vez)
-ssh -i ~/.ssh/hetzner_key root@178.104.144.144
-cd /opt/missao-saber-web
-node api/server.js &
+```env
+DATABASE_URL=postgresql://usuario:senha@localhost:5432/missaosaber
+PORT=3000
 ```
 
 ---
 
-## Adicionando Questões
+## 🗄️ Banco de Dados
 
-Edite `data/question_bank.json`. Cada questão segue esse formato:
+O schema completo está em `api/schema.sql`. As principais tabelas são:
 
-```json
-{
-  "id": 21,
-  "category": "Matematica",
-  "text": "Texto da pergunta aqui",
-  "image_path": "",
-  "answers": ["Opção A", "Opção B", "Opção C", "Opção D", "Opção E"],
-  "correct_index": 2,
-  "points": 1
-}
-```
+| Tabela | Descrição |
+|---|---|
+| `professores` | Usuários do painel |
+| `turmas` | Turmas cadastradas por professor |
+| `questoes` | Questões por turma |
+| `banco_questoes` | Banco global de questões |
+| `alunos` | Alunos registrados |
+| `resultados` | Resultados das partidas |
+| `acessos` | Log de acessos |
 
-- `category`: `"Matematica"` ou `"Portugues"`
-- `correct_index`: índice da resposta correta (0 = primeira opção)
-- `image_path`: deixe `""` se não tiver imagem, ou coloque o caminho ex: `"assets/imagens/q21.png"`
+---
+
+## 🖼️ Imagens Necessárias
+
+Coloque em `assets/imagens/` com exatamente esses nomes:
+
+| Arquivo | Onde aparece |
+|---|---|
+| `menu.png` | Tela de login |
+| `mapa.png` | Tela do mapa |
+| `quiz_matematica.png` | Fundo do quiz de Matemática |
+| `quiz_portugues.png` | Fundo do quiz de Português |
+| `resultado_matematica.png` | Tela de resultado — Matemática |
+| `resultado_portugues.png` | Tela de resultado — Português |
+| `resultado_final.png` | Tela de resultado final |
+| `fundo_login.png` | Tela de login do professor |
+
+---
+
+## 👩‍🏫 Painel do Professor
+
+Acesse em `/professor.html`. Funcionalidades disponíveis:
+
+- Cadastro e gerenciamento de turmas
+- Criação de questões por turma (até 10 por matéria)
+- Visualização de resultados por turma
+- Filtros por aprovados/reprovados e busca por nome
+- Exportação de resultados em CSV
+- Gerenciamento de professores (apenas admin)
+
+---
+
+## 🔐 Segurança
+
+- Senhas armazenadas com hash bcrypt (salt rounds: 10)
+- Professores inativos não aparecem na listagem e não conseguem logar
+- Inputs sanitizados no frontend para prevenção de XSS
+- Variáveis de ambiente para todas as credenciais
+
+---
+
+## 📄 Licença
+
+Este projeto foi desenvolvido como trabalho acadêmico para a disciplina de Engenharia de Software — [Univel](https://www.univel.br), em parceria com escola pública municipal de Cascavel — PR.
+
+Uso educacional. Não possui fins comerciais.
