@@ -1,23 +1,22 @@
 # 🎮 Missão Saber
 
-Quiz educativo gamificado desenvolvido para alunos do Ensino Fundamental da rede pública de Cascavel — PR.
+Quiz educativo gamificado desenvolvido para alunos do Ensino Fundamental da rede pública de Cascavel,PR. A proposta principal era alterar a forma como são aplicadas as avaliações.
 
-O jogo apresenta questões de **Matemática** e **Português** em uma interface com mapa de mundos, sistema de pontuação e ranking por turma — tudo acessível pelo navegador, sem instalação.
+O jogo apresenta questões de **Matemática** e **Português** em uma interface com mapa de mundos, sistema de pontuação e ranking por turma, acessível pelo navegador, sem a necessidade de instalação na máquina.
 <img width="1867" height="921" alt="missao_saber" src="https://github.com/user-attachments/assets/2bffa5c6-e18c-464c-a720-ac9b431f73df" />
 
+Acesso: https://www.gamemissaosaber.com.br/
 ---
 
 ## ✨ Funcionalidades
 
-- 🗺️ Mapa de mundos com dois blocos: Matemática e Português
-- ❓ 10 questões por matéria, embaralhadas a cada sessão
-- 🖼️ Suporte a imagens nas questões e nas alternativas
-- 🏆 Ranking por turma em tempo real
-- 📊 Painel do professor com resultados, filtros e exportação CSV
-- 👩‍🏫 Gerenciamento de turmas e questões por professor
-- 🔐 Autenticação com senha criptografada (bcrypt)
-- 📱 Layout responsivo (desktop e mobile)
-
+- Mapa de mundos com dois blocos: Matemática e Português
+- 10 questões por matéria, embaralhadas a cada sessão
+- Suporte a imagens nas questões e nas alternativas
+- Ranking por turma em tempo real
+- Painel do professor com resultados, filtros e exportação CSV
+- Gerenciamento de turmas e questões por professor
+- Autenticação com senha criptografada (bcrypt)
 ---
 
 ## 🛠️ Stack
@@ -58,37 +57,10 @@ missao-saber-html/
 └── README.md
 ```
 
----
-
-## 🚀 Como Executar Localmente
-
+--
 ### Pré-requisitos
 - Node.js 16+
 - PostgreSQL 15
-
-### Passos
-
-```bash
-# 1. Clone o repositório
-git clone https://github.com/otavio33vis/game_missaosaber.git
-cd game_missaosaber
-
-# 2. Instale as dependências
-cd api
-npm install
-
-# 3. Configure o ambiente
-cp .env.example .env
-# Edite o .env com sua string de conexão PostgreSQL
-
-# 4. Inicie o servidor
-npm start
-
-# 5. Acesse no navegador
-http://localhost:3000
-```
-
----
 
 ## ⚙️ Variáveis de Ambiente
 
@@ -156,8 +128,6 @@ Acesse em `/professor.html`. Funcionalidades disponíveis:
 
 ---
 
-## 📄 Licença
+## 📄 Resumo
 
-Este projeto foi desenvolvido como trabalho acadêmico para a disciplina de Engenharia de Software — [Univel](https://www.univel.br), em parceria com escola pública municipal de Cascavel — PR.
-
-Uso educacional. Não possui fins comerciais.
+Este projeto foi desenvolvido como trabalho acadêmico para a disciplina de Engenharia de Software da Univel, em parceria com a Escola Municipal Francisco Vaz de Lima. A escola se localiza no bairro Interlagos, periferia de Cascavel, lugar onde nasci e cresci e, por meio desse projeto, pude devolver um pouco de conhecimento a comunidade que me formou. 
