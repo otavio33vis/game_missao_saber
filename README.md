@@ -1,4 +1,4 @@
-<img width="1867" height="921" alt="missao_saber" src="https://github.com/user-attachments/assets/1295d693-f40d-429e-9abb-17938db5ffee" /># 🎮 Missão Saber
+# 🎮 Missão Saber
 
 Quiz educativo gamificado desenvolvido para alunos do Ensino Fundamental da rede pública de Cascavel — PR.
 
